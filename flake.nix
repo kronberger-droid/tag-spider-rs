@@ -25,9 +25,13 @@
           name = "rust-web-crawler-shell";
 
           buildInputs = with pkgs; lib.flatten [
+            # rust tools
             stableToolchain
             rustAnalyzer
             cargo-expand
+            rusty-man
+
+            # build and runtime dependencies
             jq
             pkg-config
             openssl
