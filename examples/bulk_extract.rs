@@ -1,79 +1,29 @@
-// src/main.rs
 use anyhow::{Context, Result};
 use async_recursion::async_recursion;
-use crossterm::event::{Event, KeyCode};
-use csv::{Reader, Writer};
-use std::io::{self, Write};
-use std::path::PathBuf;
-use std::{collections::HashMap, fs, time::Duration};
+use csv::Writer;
+use std::{thread::sleep, time::Duration};
 use tag_spider_rs::spider::Spider;
 use tag_spider_rs::tree::FileTree;
 use thirtyfour::{prelude::*, support, By, WebDriver};
 
 static URL: &str = "https://cms.schrackforstudents.com/neos/login";
-static TAGPATH: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/resources/tags.csv");
 
-#[derive(serde::Deserialize)]
-struct Credentials {
-    username: String,
-    password: String,
-}
+async fn login(driver: &WebDriver) -> Result<()> {
+    // Load credentials from file
+    let credentials_content = std::fs::read_to_string("./credentials.json")
+        .context("Could not read credentials.json. Please create this file with your username and password.")?;
 
-#[derive(Debug)]
-struct ContentEntry {
-    source_node: String,
-    breadcrumb_path: String,
-    content_type: String,
-    url: String,
-    title: String,
-    author: String,
-    file_type: String,
-    size: String,
-    url_valid: String,
-}
-
-/// Log in using the provided WebDriver.
-pub async fn login(driver: &WebDriver) -> Result<()> {
-    // Try multiple credential file locations
-    let credential_paths = [
-        PathBuf::from("/run/secrets/cms-pswd"),
-        PathBuf::from("./credentials.json"),
-        PathBuf::from("./config/credentials.json"),
-    ];
-
-    let mut credentials = None;
-
-    for path in &credential_paths {
-        match fs::read_to_string(path) {
-            Ok(content) => {
-                println!("Found credential file at: {:?}", path);
-                let creds: Credentials = serde_json::from_str(&content)
-                    .context("Credentials are not valid JSON with fields 'password' and 'username'")?;
-                credentials = Some((creds.username, creds.password));
-                break;
-            }
-            Err(_) => continue,
-        }
+    #[derive(serde::Deserialize)]
+    struct Credentials {
+        username: String,
+        password: String,
     }
 
-    let credentials = match credentials {
-        Some(creds) => creds,
-        None => {
-            eprintln!("No credential file found in any of these locations:");
-            for path in &credential_paths {
-                eprintln!("  - {:?}", path);
-            }
-            eprintln!("\nPlease create a credentials.json file with the following format:");
-            eprintln!("{{");
-            eprintln!("  \"username\": \"your_username\",");
-            eprintln!("  \"password\": \"your_password\"");
-            eprintln!("}}");
-            eprintln!("\nRecommended location: ./credentials.json (this will be ignored by git)");
-            return Err(anyhow::anyhow!("No credentials file found"));
-        }
-    };
+    let creds: Credentials = serde_json::from_str(&credentials_content)
+        .context("Invalid JSON in credentials.json")?;
 
-    // Find the login elements
+    let credentials = (creds.username, creds.password);
+
     let username_field = driver
         .find(By::Id("username"))
         .await
@@ -89,19 +39,17 @@ pub async fn login(driver: &WebDriver) -> Result<()> {
         .await
         .context("Could not find login button!")?;
 
-    // Perform the login action
     driver
         .action_chain()
         .click_element(&username_field)
-        .send_keys(&credentials.0)
+        .send_keys(credentials.0)
         .click_element(&password_field)
-        .send_keys(&credentials.1)
+        .send_keys(credentials.1)
         .click_element(&login_button)
         .perform()
         .await?;
 
     support::sleep(Duration::from_secs(2)).await;
-
     Ok(())
 }
 
@@ -125,8 +73,7 @@ async fn find_and_click_folder(driver: &WebDriver, folder_id: &str) -> Result<()
 
 async fn expand_folder_if_needed(driver: &WebDriver, folder_id: &str) -> Result<()> {
     let selector = format!("div[aria-labelledby='{}']", folder_id);
-    let folder_element = driver.find(By::Css(&selector)).await
-        .context(format!("Could not find folder element '{}'. Make sure you're on the correct page and logged in.", folder_id))?;
+    let folder_element = driver.find(By::Css(&selector)).await?;
 
     let expanded = folder_element.attr("aria-expanded").await?;
     if expanded != Some("true".to_string()) {
@@ -146,9 +93,11 @@ async fn expand_folder_if_needed(driver: &WebDriver, folder_id: &str) -> Result<
 async fn get_folder_children(driver: &WebDriver, folder_id: &str) -> Result<Vec<String>> {
     println!("Getting children for folder: {}", folder_id);
 
+    // First expand the folder to reveal its children
     expand_folder_if_needed(driver, folder_id).await?;
     support::sleep(Duration::from_millis(2000)).await;
 
+    // Now find the specific parent element and look for its children inside the node__contents div
     let parent_selector = format!("div[aria-labelledby='{}']", folder_id);
     let parent_element = driver
         .find(By::Css(&parent_selector))
@@ -157,6 +106,7 @@ async fn get_folder_children(driver: &WebDriver, folder_id: &str) -> Result<Vec<
 
     println!("Found parent element, now looking for node__contents...");
 
+    // Look for the node__contents div that contains the children (only appears when expanded)
     let contents_divs = parent_element
         .find_all(By::Css("div.node__contents___GgwYX"))
         .await?;
@@ -166,6 +116,7 @@ async fn get_folder_children(driver: &WebDriver, folder_id: &str) -> Result<Vec<
     for contents_div in contents_divs {
         println!("Found contents div, looking for child treeitems...");
 
+        // Find all direct child treeitems within this contents div
         let child_treeitems = contents_div
             .find_all(By::Css("div[role='treeitem']"))
             .await?;
@@ -183,6 +134,7 @@ async fn get_folder_children(driver: &WebDriver, folder_id: &str) -> Result<Vec<
     if child_ids.is_empty() {
         println!("No children found in contents div. Trying fallback method...");
 
+        // Fallback: Use the aria-level approach as before
         let all_items = driver.find_all(By::Css("div[role='treeitem']")).await?;
         let mut found_parent = false;
         let mut parent_level: Option<i32> = None;
@@ -230,16 +182,21 @@ async fn get_all_descendants(driver: &WebDriver, folder_id: &str, max_depth: usi
 
     println!("  Traversing folder at depth {}: {}", current_depth, folder_id);
 
+    // Get direct children of this folder
     let children = get_folder_children(driver, folder_id).await?;
 
     for child_id in children {
+        // Add this child to our list
         all_descendants.push(child_id.clone());
         println!("    Added child: {}", child_id);
 
+        // Try to get children of this child (to see if it's a folder with content)
+        // We'll be more permissive here and not fail if a child doesn't have children
         match get_folder_children(driver, &child_id).await {
             Ok(grandchildren) => {
                 if !grandchildren.is_empty() {
                     println!("    Child {} has {} grandchildren, recursing...", child_id, grandchildren.len());
+                    // This child is also a folder, recurse into it
                     let descendants = get_all_descendants(driver, &child_id, max_depth, current_depth + 1).await?;
                     all_descendants.extend(descendants);
                 } else {
@@ -247,10 +204,12 @@ async fn get_all_descendants(driver: &WebDriver, folder_id: &str, max_depth: usi
                 }
             },
             Err(_) => {
+                // This child might not be a folder or might not be expandable, that's okay
                 println!("    Child {} appears to be a leaf node or not expandable", child_id);
             }
         }
 
+        // Small delay between processing children to avoid overwhelming the server
         support::sleep(Duration::from_millis(500)).await;
     }
 
@@ -259,6 +218,7 @@ async fn get_all_descendants(driver: &WebDriver, folder_id: &str, max_depth: usi
 }
 
 async fn extract_breadcrumb_path(driver: &WebDriver) -> Result<String> {
+    // Look for breadcrumb elements in the page
     let breadcrumbs = driver
         .find_all(By::Css(".neos-breadcrumb a, .breadcrumb a, [class*='breadcrumb'] a"))
         .await?;
@@ -278,6 +238,7 @@ async fn extract_breadcrumb_path(driver: &WebDriver) -> Result<String> {
         }
     }
 
+    // Fallback: try to extract from page title or URL
     if let Ok(title) = driver.title().await {
         return Ok(title);
     }
@@ -286,6 +247,7 @@ async fn extract_breadcrumb_path(driver: &WebDriver) -> Result<String> {
 }
 
 fn extract_youtube_video_id(url: &str) -> Option<String> {
+    // Extract video ID from YouTube embed URL like: https://www.youtube.com/embed/H7WzSiZOauA?wmode=transparent&hl=de&rel=0
     if let Some(start) = url.find("/embed/") {
         let after_embed = &url[start + 7..];
         if let Some(end) = after_embed.find('?') {
@@ -305,6 +267,7 @@ async fn validate_url(url: &str) -> String {
 
     println!("    Validating URL: {}", url);
 
+    // Create a client with timeout to avoid hanging
     let client = reqwest::Client::builder()
         .timeout(Duration::from_secs(10))
         .build()
@@ -331,13 +294,27 @@ async fn validate_url(url: &str) -> String {
     }
 }
 
+#[derive(Debug)]
+struct ContentEntry {
+    source_node: String,
+    breadcrumb_path: String,
+    content_type: String,
+    url: String,
+    title: String,
+    author: String,
+    file_type: String,
+    size: String,
+    url_valid: String,
+}
+
 async fn extract_content_from_page(
     driver: &WebDriver,
     node_id: &str,
-    validate_urls: bool,
+    _content_types: &[&str],
 ) -> Result<Vec<ContentEntry>> {
     println!("  Extracting content from treeitem: {}", node_id);
 
+    // Click on the treeitem to navigate to its content
     println!("  Clicking treeitem to load content...");
     find_and_click_folder(driver, node_id).await?;
 
@@ -346,6 +323,7 @@ async fn extract_content_from_page(
 
     println!("  Looking for dynamic content containers directly in the page...");
 
+    // First, let's check if we need to enter an iframe after all
     let iframes = driver.find_all(By::Tag("iframe")).await?;
     println!("  Found {} iframes on the page", iframes.len());
 
@@ -357,12 +335,48 @@ async fn extract_content_from_page(
         }
     }
 
+    // Look for dynamic content containers
     let dynamic_containers = driver
         .find_all(By::Css(".dynamicContent.dynamic-content-container-1"))
         .await?;
 
     println!("  Found {} dynamic containers", dynamic_containers.len());
 
+    // If no dynamic containers found, let's see what IS on the page
+    if dynamic_containers.is_empty() {
+        println!("  No dynamic containers found. Debugging page content...");
+
+        // Check for any elements with 'dynamic' in the class
+        if let Ok(dynamic_els) = driver.find_all(By::Css("[class*='dynamic']")).await {
+            println!("  Found {} elements with 'dynamic' in class", dynamic_els.len());
+            for (i, el) in dynamic_els.iter().enumerate().take(3) {
+                if let Ok(class) = el.attr("class").await {
+                    println!("    Dynamic element {}: class='{:?}'", i + 1, class);
+                }
+            }
+        }
+
+        // Check for external link elements
+        if let Ok(ext_links) = driver.find_all(By::Css("[data-neos-node-type*='ExternalLinks']")).await {
+            println!("  Found {} ExternalLinks elements", ext_links.len());
+        }
+
+        // Check for any divs with content
+        if let Ok(all_divs) = driver.find_all(By::Tag("div")).await {
+            println!("  Found {} total div elements on page", all_divs.len());
+        }
+
+        // Try alternative selectors that might match
+        if let Ok(alt1) = driver.find_all(By::Css(".dynamicContent")).await {
+            println!("  Found {} elements with just '.dynamicContent'", alt1.len());
+        }
+
+        if let Ok(alt2) = driver.find_all(By::Css("[class*='dynamic-content']")).await {
+            println!("  Found {} elements with 'dynamic-content' in class", alt2.len());
+        }
+    }
+
+    // Extract breadcrumb path
     let breadcrumb_path = extract_breadcrumb_path(driver).await.unwrap_or_else(|_| "Unknown Path".to_string());
     println!("  Breadcrumb path: {}", breadcrumb_path);
 
@@ -373,8 +387,11 @@ async fn extract_content_from_page(
         container.scroll_into_view().await?;
         support::sleep(Duration::from_millis(500)).await;
 
+        // The data-neos-node-type is on the paragraph elements, not on a containing div
+        // So we need to look for divs that contain ExternalLinks paragraphs
         println!("    Looking for divs containing ExternalLinks paragraphs...");
 
+        // Find divs that have ExternalLinks in their fusion path (these contain the paragraphs)
         let link_container_divs = container
             .find_all(By::Css("div[data-__neos-fusion-path*='ExternalLinks']"))
             .await?;
@@ -395,6 +412,7 @@ async fn extract_content_from_page(
                 url_valid: String::new(),
             };
 
+            // Extract URL
             println!("      Looking for URL...");
             if let Ok(url_element) = item.query(By::Css("p[property='typo3:url']")).first().await {
                 if let Ok(url) = url_element.text().await {
@@ -405,6 +423,7 @@ async fn extract_content_from_page(
                 println!("      No URL element found");
             }
 
+            // Extract Title
             println!("      Looking for Title...");
             if let Ok(title_element) = item
                 .query(By::Css("p[property='typo3:title']"))
@@ -419,6 +438,7 @@ async fn extract_content_from_page(
                 println!("      No Title element found");
             }
 
+            // Extract Author
             println!("      Looking for Author...");
             if let Ok(author_element) = item
                 .query(By::Css("p[property='typo3:author']"))
@@ -433,6 +453,7 @@ async fn extract_content_from_page(
                 println!("      No Author element found");
             }
 
+            // Extract Type
             println!("      Looking for Type...");
             if let Ok(type_element) = item
                 .query(By::Css("p[property='typo3:type']"))
@@ -447,6 +468,7 @@ async fn extract_content_from_page(
                 println!("      No Type element found");
             }
 
+            // Extract Size
             println!("      Looking for Size...");
             if let Ok(size_element) = item
                 .query(By::Css("p[property='typo3:size']"))
@@ -461,17 +483,16 @@ async fn extract_content_from_page(
                 println!("      No Size element found");
             }
 
-            if validate_urls {
-                entry.url_valid = validate_url(&entry.url).await;
-            } else {
-                entry.url_valid = "Skipped".to_string();
-            }
+            // Validate URL if present
+            entry.url_valid = validate_url(&entry.url).await;
 
+            // Only add entry if we have at least a URL or title
             if !entry.url.is_empty() || !entry.title.is_empty() {
                 entries.push(entry);
             }
         }
 
+        // Now look for YouTube content in the same containers
         println!("    Looking for YouTube content...");
         let youtube_container_divs = container
             .find_all(By::Css("div[data-__neos-fusion-path*='YouTube']"))
@@ -493,6 +514,7 @@ async fn extract_content_from_page(
                 url_valid: String::new(),
             };
 
+            // Extract YouTube URL from iframe src
             println!("      Looking for YouTube iframe...");
             if let Ok(iframe_element) = item.query(By::Css("iframe")).first().await {
                 if let Ok(src_url) = iframe_element.attr("src").await {
@@ -500,6 +522,7 @@ async fn extract_content_from_page(
                         entry.url = url.trim().to_string();
                         println!("      Found YouTube URL: {}", entry.url);
 
+                        // Extract video ID from YouTube URL for title
                         if let Some(video_id) = extract_youtube_video_id(&entry.url) {
                             entry.title = format!("YouTube Video ({})", video_id);
                         }
@@ -509,18 +532,17 @@ async fn extract_content_from_page(
                 println!("      No YouTube iframe found");
             }
 
-            if validate_urls {
-                entry.url_valid = validate_url(&entry.url).await;
-            } else {
-                entry.url_valid = "Skipped".to_string();
-            }
+            // Validate URL if present
+            entry.url_valid = validate_url(&entry.url).await;
 
+            // Only add entry if we have a URL
             if !entry.url.is_empty() {
                 entries.push(entry);
             }
         }
     }
 
+    // Exit iframe if we entered one
     if !iframes.is_empty() {
         let _ = driver.enter_default_frame().await;
     }
@@ -529,157 +551,39 @@ async fn extract_content_from_page(
     Ok(entries)
 }
 
-/// Load CSV data for tags.
-fn load_csv_data(path: &str) -> Result<HashMap<String, String>> {
-    let mut tags: HashMap<String, String> = HashMap::new();
-    let mut reader = Reader::from_path(path)?;
+#[tokio::main]
+async fn main() -> Result<()> {
+    env_logger::init();
 
-    for line in reader.records() {
-        let record = line?;
-        tags.insert(record[0].to_string(), record[1].to_string());
-    }
-
-    Ok(tags)
-}
-
-/// Example function to add tags.
-async fn add_tags(clear: bool, driver: &WebDriver) -> Result<()> {
-    let tags = load_csv_data(TAGPATH).unwrap();
-    let iframe = driver
-        .query(By::Css(r#"iframe[name="neos-content-main"]"#))
-        .first()
-        .await?;
-    iframe.clone().enter_frame().await?;
-
-    let content_collection = driver
-        .query(By::Css(
-            "html body.neos-backend div.container div.neos-contentcollection",
-        ))
-        .first()
-        .await?;
-    let questions = content_collection
-        .find_all(By::Css("p.neos-inline-editable.questionTitle"))
-        .await?;
-
-    for question in questions {
-        question.scroll_into_view().await?;
-        let text = question.text().await?;
-        let id = text.split(' ').next().unwrap();
-        let value = tags.get(id).unwrap();
-
-        question.click().await?;
-        driver.enter_default_frame().await?;
-
-        let tag_textbox = driver
-            .query(By::Css("#__neos__editor__property---Tags"))
-            .first()
-            .await?;
-
-        driver
-            .action_chain()
-            .click_element(&tag_textbox)
-            .key_down(thirtyfour::Key::Control)
-            .send_keys("a")
-            .key_up(thirtyfour::Key::Control)
-            .send_keys(thirtyfour::Key::Backspace)
-            .perform()
-            .await?;
-
-        if !clear {
-            if let Some(val) = tags.get(id) {
-                tag_textbox.send_keys(val).await?;
-            } else {
-                eprintln!("Error: key {} not found! Skipping...", id);
-                iframe.clone().enter_frame().await?;
-                continue;
-            }
-        }
-
-        let apply_button = driver
-            .query(By::Css("#neos-Inspector-Apply"))
-            .first()
-            .await?;
-        apply_button.click().await?;
-
-        println!("{} -> {}", id, value);
-        iframe.clone().enter_frame().await?;
-        support::sleep(Duration::new(1, 0)).await;
-    }
-    driver.enter_default_frame().await?;
-    Ok(())
-}
-
-fn read_line() -> String {
-    let mut input = String::new();
-    print!("> ");
-    io::stdout().flush().unwrap();
-    io::stdin().read_line(&mut input).unwrap();
-    input.trim().to_string()
-}
-
-fn ask_yes_no(question: &str) -> bool {
-    loop {
-        println!("{} (y/n)", question);
-        let input = read_line().to_lowercase();
-        match input.as_str() {
-            "y" | "yes" => return true,
-            "n" | "no" => return false,
-            _ => println!("Please enter 'y' or 'n'"),
-        }
-    }
-}
-
-async fn bulk_extract_content(driver: &WebDriver) -> Result<()> {
-    println!("\n=== Bulk Content Extraction ===");
-
-    println!("Enter the treeitem ID to start extraction from:");
-    let target_folder_id = read_line();
-
-    if target_folder_id.is_empty() {
-        println!("No folder ID provided. Using default: treeitem-c6643bf0-label");
-        let target_folder_id = "treeitem-c6643bf0-label";
-        return do_bulk_extract(driver, target_folder_id).await;
-    }
-
-    do_bulk_extract(driver, &target_folder_id).await
-}
-
-async fn do_bulk_extract(driver: &WebDriver, target_folder_id: &str) -> Result<()> {
-    let validate_urls = ask_yes_no("Do you want to validate URLs? (This may take longer)");
+    // Configuration - modify these as needed
+    let target_folder_id = std::env::args()
+        .nth(1)
+        .unwrap_or_else(|| "treeitem-c6643bf0-label".to_string()); // Default folder ID
+    let content_types = &["p", "h1", "h2", "h3", "ul", "ol"]; // Content types to extract
+    let output_file = "extracted_links.csv";
 
     println!("Starting bulk extraction from folder: {}", target_folder_id);
-    if validate_urls {
-        println!("URL validation is enabled - this will check if each URL is accessible");
-    } else {
-        println!("URL validation is disabled - URLs will be marked as 'Skipped'");
-    }
+    println!("Looking for external link content");
 
-    println!("Checking if target folder exists on current page...");
+    // Create a minimal FileTree just to satisfy Spider constructor
+    let dummy_tree = FileTree::default();
+    let spider = Spider::new(DesiredCapabilities::firefox(), URL, dummy_tree).await?;
 
-    // Check if we're on the right page and logged in
-    let page_title = driver.title().await.unwrap_or_else(|_| "Unknown".to_string());
-    println!("Current page title: {}", page_title);
+    login(&spider.driver).await?;
 
-    // Wait a bit to ensure page is fully loaded
-    println!("Waiting for page to load completely...");
-    support::sleep(Duration::from_secs(3)).await;
+    sleep(Duration::from_secs(10));
 
     // Navigate to the target folder and expand it
-    expand_folder_if_needed(driver, target_folder_id).await?;
+    expand_folder_if_needed(&spider.driver, &target_folder_id).await?;
 
     // Get all descendants (children, grandchildren, etc.) of the target folder
-    let max_traversal_depth = 5;
+    let max_traversal_depth = 5; // Prevent infinite recursion, adjust as needed
     println!("Starting recursive traversal with max depth: {}", max_traversal_depth);
-    let child_ids = get_all_descendants(driver, target_folder_id, max_traversal_depth, 0).await?;
+    let child_ids = get_all_descendants(&spider.driver, &target_folder_id, max_traversal_depth, 0).await?;
     println!("Found {} total items to process (including all descendants)", child_ids.len());
 
-    // Create embedded_content directory if it doesn't exist
-    fs::create_dir_all("./embedded_content").context("Failed to create embedded_content directory")?;
-
-    // Create CSV writer with entry ID as filename
-    let output_file = format!("./embedded_content/{}.csv", target_folder_id);
-    println!("CSV will be saved to: {}", output_file);
-    let mut csv_writer = Writer::from_path(&output_file).context("Failed to create CSV file")?;
+    // Create CSV writer
+    let mut csv_writer = Writer::from_path(output_file).context("Failed to create CSV file")?;
 
     // Write CSV header
     csv_writer
@@ -698,7 +602,8 @@ async fn do_bulk_extract(driver: &WebDriver, target_folder_id: &str) -> Result<(
             child_id
         );
 
-        match extract_content_from_page(driver, child_id, validate_urls).await {
+        // Since descendants are treeitems, extract content directly from each one
+        match extract_content_from_page(&spider.driver, child_id, content_types).await {
             Ok(entries) => {
                 if !entries.is_empty() {
                     println!("✓ Found {} entries in item {}", entries.len(), child_id);
@@ -718,8 +623,8 @@ async fn do_bulk_extract(driver: &WebDriver, target_folder_id: &str) -> Result<(
     }
 
     // Also extract from the target folder itself
-    println!("\nProcessing target folder: {}", target_folder_id);
-    match extract_content_from_page(driver, target_folder_id, validate_urls).await {
+    println!("Processing target folder: {}", target_folder_id);
+    match extract_content_from_page(&spider.driver, &target_folder_id, content_types).await {
         Ok(entries) => {
             if !entries.is_empty() {
                 println!("Found {} entries in target folder", entries.len());
@@ -755,76 +660,11 @@ async fn do_bulk_extract(driver: &WebDriver, target_folder_id: &str) -> Result<(
 
     csv_writer.flush().context("Failed to flush CSV writer")?;
 
-    println!("\n=== Bulk extraction complete! ===");
+    println!("\nBulk extraction complete!");
     println!("Total entries found: {}", all_entries.len());
     println!("Successfully processed pages: {}", successful);
     println!("Failed pages: {}", failed);
     println!("CSV output saved to: {}", output_file);
-    println!("Press any key to return to main menu...");
-    let _ = read_line();
-
-    Ok(())
-}
-
-#[tokio::main]
-async fn main() -> Result<()> {
-    let filetree = FileTree::from_json_file(PathBuf::from("resources/tree.json"))
-        .context("Could not create filetree from json")?;
-
-    // Check for headless mode via environment variable
-    let headless = std::env::var("HEADLESS").unwrap_or_else(|_| "false".to_string()).to_lowercase() == "true";
-
-    let caps = if headless {
-        println!("Running in headless mode");
-        let mut caps = DesiredCapabilities::firefox();
-        caps.set_headless()?;
-        caps
-    } else {
-        println!("Running in normal (visible) mode. Set HEADLESS=true environment variable to run headless.");
-        DesiredCapabilities::firefox()
-    };
-
-    let spider = Spider::new(caps, URL, filetree).await?;
-
-    // Log in.
-    login(&spider.driver).await?;
-
-    println!("Login attempted. Please manually navigate to the CMS and log in if needed.");
-    println!("Make sure you're on the page with the file tree visible before using bulk extraction.");
-    println!("Waiting 10 seconds for you to complete login and navigation...");
-    support::sleep(Duration::from_secs(10)).await;
-
-    let welcome_message = r#"
-    Welcome to the tag spider. You can do the following actions by pressing:
-
-    q -> quit the program
-    a -> add tags (must be in question answer environment)
-    c -> clear tags (must be in question answer environment)
-    p -> test opening and closing treeitems
-    d -> bulk extract content from folders (with URL validation option)
-
-    NOTE: For bulk extraction (d), make sure you're logged in and on a page where
-    the file tree is visible with the target folder ID available.
-    "#;
-
-    loop {
-        println!("{}", welcome_message);
-        if let Event::Key(event) = crossterm::event::read().unwrap() {
-            match event.code {
-                KeyCode::Char('q') => break,
-                KeyCode::Char('a') => add_tags(false, &spider.driver).await?,
-                KeyCode::Char('c') => add_tags(true, &spider.driver).await?,
-                KeyCode::Char('p') => {
-                    let id = "treeitem-c6643bf0-label";
-                    spider.extract_content(id).await?;
-                }
-                KeyCode::Char('d') => {
-                    bulk_extract_content(&spider.driver).await?;
-                }
-                _ => {}
-            }
-        }
-    }
 
     spider.driver.quit().await?;
     Ok(())

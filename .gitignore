@@ -1,1 +1,10 @@
 /target
+geckodriver.log
+
+# Credential files - DO NOT COMMIT
+credentials.json
+config/credentials.json
+/run/secrets/
+
+# Extracted content
+embedded_content/

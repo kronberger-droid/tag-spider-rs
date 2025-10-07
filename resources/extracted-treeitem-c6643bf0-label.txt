@@ -1,0 +1,796 @@
+1.1.1 Elektrischer Stromkreis (Funktion)
+1.1.1 Erklären Sie die Funktionsweise des elektrischen Stromkreises.
+Ein elektrischer Stromkreis ist grundsätzlich ein System, welches dazu verwendet wird, Energie zu transportieren. Die elektrischen Ladungsträger, im Falle eines elektrischen Stromkreises meist Elektronen, sind für den Energietransport verantwortlich. Um den Ladungstransport zu ermöglichen, wird außerdem ein Transportmedium benötigt. Dafür eignen sich besonders Metalle, aber auch andere elektrische Leiter.
+Des Weiteren ist in jedem Stromkreis eine elektrische Quelle notwendig, welche ein Spannungspotential erzeugt, um die Elektronen „anzutreiben“.
+1.1.2 Elektrischer Stromkreis (Wirkungen)
+1.1.2 Nennen und erklären Sie die Wirkungsarten des elektrischen Stroms.
+Wärmewirkung: Durch einen elektrischen Strom in einem Leiter kommt es aufgrund des elektrischen Widerstands zu einer Umwandlung von elektrischer in thermische Energie.
+Lichtwirkung: Bei einer Glühbirne kommt es aufgrund der starken Erwärmung zu einer Abstrahlung von sichtbarem Licht.
+Magnetische Wirkung: Tritt bei jedem elektrischen Strom auf, da dieser immer ein Magnetfeld erzeugt.
+Chemische Wirkung: Tritt bei Elektrolyse auf. Man versteht darunter die Aufteilung bzw. Ionisierung von Stoffen aufgrund des elektrischen Potentials.
+1.1.3 Ladung und Stromstärke
+1.1.3 Welcher Zusammenhang besteht zwischen Ladungsmenge Stromstärke?
+Der mathematische Zusammenhang lautet:
+Wobei Q die Ladungsmenge, I die Stromstärke und t die Zeit ist.
+Die Stromstärke gibt an wie viel Ladungsträger pro Zeit durch eine bestimmte Querschnittfläche fließen. Wenn man die Stromstärke mit der Zeit multipliziert, dann bekommt man die Ladungsmenge, welche in einer bestimmten Zeit t fließen.
+1.1.4 Spannungserzeugung
+1.1.4 Wie können elektrische Spannungen erzeugt werden? 
+Elektrische Spannung kann immer dann erzeugt werden, wenn es zu einer ausreichenden Ladungstrennung kommt, welche ein elektrisches Potential zur Folge hat.
+Das kann durch chemische Prozesse, aber auch durch den photoelektrischen Effekt oder auch durch elektromagnetische Induktion erreicht werden.
+1.1.5 Technische Stromrichtung
+1.1.5 Wie ist die technische Stromrichtung definiert?
+Die technische Stromrichtung ist so definiert, dass die Richtung des elektrischen Stroms vom Plus- zum Minuspol verläuft. Hingegen ist die physikalische Stromrichtung vom Minus- zum Pluspol.
+Da Elektronen eine negative Ladung besitzen fließen sie physikalisch gesehen vom Minus zum Pluspol. Trotzdem hat dieser Gegensatz für Berechnungen keinerlei Relevanz.
+1.1.6 Elektrische Ladung (Berechnung)
+1.1.6 Rechnen Sie die elektrische Ladung Q=0,0006883 kAh in die Einheit As um.
+
+1.1.7 Kapazität (Berechnung)
+1.1.7 Rechnen Sie die Kapazität
+in die Einheit mF um.
+
+1.1.8 Elektrische Ladung (Berechnung)
+1.1.8 Rechnen Sie die elektrische Ladung
+ in die Einheit kAh um.
+
+1.1.9 Stromstärke (Berechnung)
+1.1.9 Rechnen Sie die Stromstärke
+ in die Einheit A um.
+
+1.1.10 Stromstärke (Berechnung)
+1.1.10 Wie viel sind 1440 A in kA?
+
+1.1.11 Ohmsches Gesetz (Formeln)
+1.1.11 Wie lautet das Ohmsche Gesetz in seinen drei wichtigsten Formen?
+
+1.1.12 Kurzschluss und Leerlauf (Definition)
+1.1.12 Erklären Sie was man unter einem Kurzschluss und unter einem Leerlauf versteht!
+Unter einem Kurzschluss versteht man in der Praxis, dass kein Verbraucher im Stromkreis vorhanden ist und somit der Widerstand des gesamten Stromkreises sehr klein ist. Dadurch kommt es zu sehr hohen Stromstärken, welche zur Erhitzung der Leiter oder auch zu Schäden in der Spannungsquelle führen kann.
+Der Leerlauf ist ein Zustand, bei dem an der Spannungsquelle kein Verbraucher angeschlossen ist. Jedoch ist der Stromkreis hingegen zum Kurzschluss auch nicht durch den Leiter geschlossen. Wodurch der elektrische Widerstand so hoch ist, dass praktisch kein Strom fließen kann. (Außer bei hohen Spannungen, wo es zum Überschlag kommen kann).
+1.1.13 Reale und ideale Spannungsquelle (Unterschiede)
+1.1.13 Worin unterscheidet sich eine reale und eine ideale Spannungsquelle?
+reale: eine reale Spannungsquelle hat einen Innenwiderstand (
+) 
+ideale: eine ideale Spannungsquelle besitzt keinen Innenwiderstand und liefert somit unabhängig von der Last, die gleiche Spannung
+1.1.14 Spannung (Definition)
+1.1.14 Was versteht man unter Spannung? Geben Sie Einheit und Formelzeichen an.
+Die elektrische Spannung ist die Potentialdifferenz zwischen zwei Punkten. Verstehen lässt sich das dadurch, dass man zwei Punkte in einem elektrischen Feld betrachtet. Jeder Punkt besitzt ein elektrisches Potential, was nichts anderes ist als die Fähigkeit eines elektrischen Feldes Arbeit zu verrichten. Wenn man nun die Ladung von Punkt A zu Punkt B bewegen will, dann gibt es einen Potentialunterschied, den man auch elektrische Spannung nennt.
+Als Formelzeichen für die elektrische Spannung wird ein U verwendet und sie wird in der internationale SI-Einheit Volt [V], angegeben.
+1.1.15 Elektrisches Potential
+1.1.15 Wie ist der Zusammenhang des elektrischen Potentials?
+Das elektrische Potential entspricht dem relativen Energiezustand einer Ladung. Das Potential eines Punktes im Strömungsfeld kann gegenüber einem Bezugspunkt angegeben werden. 
+1.1.16 Ohmsches Gesetz (Formel)
+1.1.16 Das Ohmsche Gesetz setzt den elektrischen Widerstand R, die anliegende Spannung U am Widerstand R sowie den durch den Widerstand R fließenden elektrischen Strom I in Beziehung.
+Formulieren Sie den elektrischen Widerstand R mit Hilfe der elektrischen Spannung U und dem elektrischen Strom I!
+
+1.1.17 Ohmsches Gesetz (Formel)
+1.1.17 Das Ohmsche Gesetz setzt den elektrischen Widerstand R, die anliegende Spannung U am Widerstand R sowie den durch den Widerstand R fließenden elektrischen Strom I in Beziehung.
+Formulieren Sie die elektrischen Spannung U mit Hilfe der elektrischen Widerstands R und dem elektrischen Strom I!
+
+1.1.18 Festwiderstände (Definition)
+1.1.18 Was sind Festwiderstände?
+Festwiderstände sind Widerstände, die ihren Widerstandswert trotz elektrischer und physikalischer Einflüsse nicht ändern.
+1.1.19 Festwiderstände (Arten)
+1.1.19 Welche Festwiderstände kennen Sie?
+Drahtwiderstände
+Schichtwiderstände
+1.1.20 Drahtwiderstände (Anwendung)
+1.1.20 Nennen Sie Anwendungen von Drahtwiderständen!
+Hauptsächlich für größere Leistungen, z.B.: für Anlasswiderstände von Motoren und in der Messtechnik.
+1.1.21 Drahtwiderstände (Widerstandswert)
+1.1.21 Wovon hängt der Widerstandswert eines Drahtwiderstandes ab?
+Der Widerstandswert wird vom Werkstoff, von der Länge und dem Querschnitt des Widerstanddrahtes bestimmt.
+1.1.22 Kohleschichtwiderstände
+1.1.22 Nennen Sie Vorteile, Nachteile und Anwendungen von Kohleschichtwiderständen!
+Vorteile: Kosten günstig, geringe Abmessungen, gut bei hohen Frequenzen.
+Nachteil: Große Widerstandswerts Abnahme bei hohen Temperaturen.
+Verwendung: Meist verwendeter Widerstand in der Elektrotechnik.
+1.1.23 Metallschichtwiderstände
+1.1.23 Nennen Sie Vorteile, Nachteile und Anwendungen von Metallschichtwiderständen!
+Vorteil: Hohe Belastbarkeit, bis 250°C einsetzbar, gute Hochfrequenz Eigenschaften.
+Nachteil: Teuer
+Anwendung: In Messgeräten
+1.1.24 Veränderliche Widerstände (Definition)
+1.1.24 Was versteht man unter veränderlichen Widerständen?
+Veränderliche Widerstände sind Widerstände, welche aufgrund von externen Einflüssen ihren Widerstandswert verändern können. Ein gutes Beispiel dafür sind temperaturabhängige Widerstände (NTC/PTC) welche mit sinkender/steigender Temperatur an Widerstand zu- bzw. abnehmen. Diese Art von veränderlichen Widerständen nennt man auch „Parameterabhängige Widerstände“.
+Aber auch Potentiometer sind veränderliche Widerstände, welche durch ein mechanisches Stellglied eine Veränderung des Widerstandwerts ermöglichen. Man nennt solche Widerstände auch „verstellbare Widerstände“
+1.1.25 Veränderliche Widerstände (Arten)
+1.1.25 Welche Widerstände gehören zu den veränderlichen Widerständen?
+Temperaturabhängige Widerstände
+Spannungsabhängige Widerstände
+Magnetfeldabhängige Widerstände
+Lichtabhängige Widerstände
+Druckabhängige Widerstände
+1.1.26 PTC
+1.1.26 Gib das Schaltzeichen und Anwendungen vom PTC (Positiver Temperatur Koeffizient) an!
+Enter caption here
+Leitet im kalten Zustand besser als im warmen (Kaltleiter).
+Temperaturfühler, Füllstandsmelder
+1.1.27 NTC
+1.1.27 Gib das Schaltzeichen und Anwendungen vom NTC (Negativer Temperatur Koeffizient) an!
+Enter caption here
+Leitet im warmen Zustand besser als im kalten (Heißleiter).
+Temperaturfühler, Temperaturstabilisierung vom Halbleiter.
+1.1.28 VDR
+1.1.28 Gib das Schaltzeichen und Anwendungen vom VDR (spannungsabhängiger Widerstand) an!
+Enter caption here
+Widerstand nimmt bei steigender Spannung ab.
+Spannungsbegrenzung, Funkenlöschung
+1.1.29 MDR
+1.1.29 Gib das Schaltzeichen und Anwendungen vom MDR (magnetabhängiger Widerstand) an!
+Enter caption here
+Je größer das Magnetfeld, desto größer der Widerstand.
+Kontaktlose Schalter usw.
+1.1.30 LDR
+1.1.30 Gib das Schaltzeichen und Anwendungen vom LDR (lichtabhängiger Widerstand) an!
+Enter caption here
+Stärkere Lichteinstrahlung, geringerer Widerstand
+Lichtschranken, Dämmerungsschalter
+1.1.31 Druckabhängiger Widerstand
+1.1.31 Gib das Schaltzeichen und Anwendung vom druckabhängigen Widerstand an!
+Enter caption here
+Je größer der Druck, desto höher der Widerstand.
+Druckwächter
+1.1.32 Stromkreis (Bestandteile)
+1.1.32 Woraus besteht ein Stromkreis?
+Grundsätzlich ist ein elektrischer Stromkreis in der Elektrotechnik eine vereinfachte graphische Darstellung des elektrischen Stroms, bzw. der elektrischen Spannung und dessen Verhalten durch verschiedene Bauteile.
+Der geschlossene Stromkreis besteht im einfachsten Fall aus einer Spannungsquelle, einem elektrischen Leiter und einem Verbraucher.
+Damit in der Praxis im Stromkreis ein Strom fließen kann muss er geschlossenen sein. Im Unterschied zum offenen Stromkreis bedeutet das eine leitende Verbindung über den ganzen Stromkreis. Ansonsten spricht man vom offenen Stromkreis.
+1.1.33 Stromkreisbedingungen
+1.1.33 Nennen Sie die grundlegende Voraussetzung damit in einem Stromkreis elektrischer Strom fließen kann.
+Um einen elektrischen Strom zu erzeugen, muss eine elektrische Spannung erzeugt bzw. implementiert werden. Das kann zum Beispiel durch das Anschließen einer Batterie erreicht werden. Die elektrische Leitfähigkeit des Stromkreises ist keine grundlegende Vorrausetzung, da bei ausreichend hoher Spannung überall ein Strom fließen kann.
+Also selbst bei einem offenen Stromkreis kann bei sehr hohen Spannungen ein Strom fließen.
+In Anbetracht von wenigen Volt jedoch muss in der Praxis ein geschlossener Stromkreis vorliegen, um einen elektrischen Strom zu erreichen.
+1.1.34 Schalter (Aufgabe)
+1.1.34 Welche Aufgabe hat ein Schalter im Stromkreis?
+Ein Schalter wird in einem Stromkreis dazu verwendet den Fluss der Ladungsträger zu unterbrechen. Physikalisch gesehen wird der elektrische Widerstand durch das Öffnen des Schalters praktisch unendlich groß, wodurch kein elektrischer Strom mehr fließen kann.
+Verwendet werden Schalter in allen Bereichen der Elektrotechnik bzw. Elektronik. Besonders immer dann, wenn man die Fähigkeit haben will den Stromkreis durch eine mechanische, oder elektronische Ansteuerung öffnen oder schließen zu können.
+1.1.35 Elektrischer Strom (Wirkung)
+1.1.35 Was sind die allgemeinen Wirkungen des elektrischen Stroms?
+Elektrischer Strom kann verschiedene Wirkungen haben: thermische (Wärme), magnetische (Magnetfelder), chemische (Reaktionen) und optische (Licht). Diese Wirkungen können einzeln oder in Kombination in verschiedenen technologischen Anwendungen auftreten.
+1.1.36 Elektrischer Strom (Wärmewirkung)
+1.1.36 Geben Sie mindestens 4 Beispiele für die technische Anwendung der Wärmewirkung des elektrischen Stromes an.
+Schmelzsicherung
+elektrisches Bügeleisen
+Heizanlagen
+Toaster
+Wasserkocher
+Kochplatten
+1.1.37 Elektrischer Strom (Nebenwirkung)
+1.1.37 Welche Wirkung des Stromes tritt meistens als unerwünschte Nebenwirkung auf?
+Da bei einem elektrischen Strom durch einen elektrischen Widerstand in einer Schaltung immer Wärme entsteht kommt es in der Praxis nahezu immer zu einer Wärmewirkung. Selbst wenn versucht wird den Widerstand zu minimieren. Auch gute elektrische Leiter weisen einen geringen elektrischen Widerstand auf, der zu Wärmeerzeugung führt.
+1.1.38 Elektrischer Strom (Wirkungen)
+1.1.38 Welche erwünschte/welche unerwünschte Art der Stromwirkung tritt auf: beim Elektromotor; bei der Glühlampe; beim Galvanisieren; beim Elektroschweißen. Gegen Sie außerdem an welche Wirkung meist ein Nebenprodukt ist.
+Elektromotor: Magnetische Wirkung/Wärmewirkung
+Glühlampe: Lichtwirkung/Wärmewirkung
+Galvanisieren: Chemische Wirkung/Wärmewirkung
+Elektroschweißen: Wärmewirkung/Lichtwirkung
+Häufig ist die Wärmewirkung ein unerwünschter Nebeneffekt der Auftritt. Ein klassisches Beispiel dafür ist die Glühbirne, wo der Großteil der Energie in der Wärmewirkung verloren geht.
+1.1.39 Elektrischer Strom
+1.1.39 Geben Sie die Einheit der Stärke und das Formelzeichen an und erklären Sie die Kennzeichnung des elektrischen Stroms in einem Stromkreis.
+Die Einheit der Stromstärke ist Ampere, abgekürzt mit einem A. Als Formelzeichen wird für die Stromstärke das I verwendet. Es gilt des Weiteren: 1 A = 1
+. Also ein Ampere entspricht einem Fluss von 1 Coulomb Ladung pro Sekunde.
+Bei der Kennzeichnung in einem elektrischen Stromkreis wird für den elektrischen Strom ein Pfeil verwendet. Dieser gibt nur die Richtung des elektrischen Stroms an, wobei man dort üblicherweise die technische Stromrichtung einträgt, also von Plus nach Minus.
+1.1.40 Stromstärke (Einheit)
+1.1.40 Was ist die Einheit der Stromstärke und wie wird sie symbolisiert?
+Die Einheit der Stromstärke ist das Ampere, abgekürzt als "A". In Formeln wird die Stromstärke oft mit dem Buchstaben "I" repräsentiert. Ein Ampere entspricht dem Fluss von einer Coulomb Ladung pro Sekunde.
+1.1.41 Strom im Stromkreis (Kennzeichnung)
+1.1.41 Wie wird der elektrische Strom in einem Stromkreis gekennzeichnet?
+In einem elektrischen Stromkreis wird der Strom meistens durch einen Pfeil dargestellt. Der Pfeil zeigt die technische Stromrichtung an, also vom Pluspol der Spannungsquelle zum Minuspol. In der Realität bewegen sich die Elektronen jedoch in der entgegengesetzten Richtung, also vom Minuspol zum Pluspol.
+1.1.42 Strommesser
+1.1.42 Erklären Sie wie man ein Amperemeter in einem Stromkreis verwendet. Kann man das Strommessgerät vor und nach dem Verbraucher schalten, wenn ja warum?
+Wenn man mit einem Amperemeter in einem Stromkreis die elektrische Stromstärke bestimmen will, muss man ein Strommessgerät in Serie zum Verbraucher schalten, also dort wo der zumessende elektrische Strom fließt.
+Man kann sich jedoch aussuchen, ob man das Strommessgerät vor oder nach dem Verbraucher einbringt. Aufgrund der Ladungserhaltung bzw. Energieerhaltung muss auf einem beliebigen Punkt dieselbe Ladung hinein- sowie, hinausfließen, ansonsten würde Ladung aus dem nichts erzeugt oder vernichtet werden.
+Aus diesem Umstand muss der elektrische Strom vor dem Verbraucher derselbe sein wie nach dem Verbraucher.
+1.1.43 Strommessgerät vor und nach Verbraucher
+1.1.43 Ist die gemessene Stromstärke vor und nach einem Verbraucher im Stromkreis die gleiche? Wenn ja, warum?
+Ja, die Stromstärke vor und nach einem Verbraucher in einem geschlossenen Stromkreis ist die gleiche. Das liegt am Prinzip der Ladungserhaltung. In einem geschlossenen Stromkreis bleibt die Gesamtmenge der Ladung konstant. Daher muss die Menge der Ladung, die in einen Punkt des Kreises hineinfließt, gleich der Menge sein, die aus dem Punkt herausfließt. Einfach gesagt: Was rein kommt, muss auch wieder raus.
+1.1.44 Elektronen (Richtung)
+1.1.44 In welcher Richtung fließen die Elektronen durch den Verbraucher?
+Die Elektronen fließen entlang der elektrischen Feldlinien, welche vom elektrischen Feld erzeugt werden. Anders ausgedrückt kann man sagen, sie fließen vom hohen zum niedrigen Potential. Oder vom Minuspol zum Pluspol.
+1.1.45 Stromarten
+1.1.45 Welche zwei grundsätzlichen Stromarten gibt es? Erklären Sie den Unterschied.
+Für Anwendungszwecke unterscheidet man zwischen AC – „Alternate Current“ und DC – „Direct Current“. Also Wechselstrom und Gleichstrom. Der Unterschied besteht darin, dass beim Wechselstrom die elektrische Stromstärke mit einer Sinus-Funktion beschrieben werden kann, also schwingt. Beim Gleichstrom hingegen fließt der elektrische Strom mit einer konstanten elektrischen Stromstärke.
+1.1.46 Gleichstrom (Definition)
+1.1.46 Was versteht man unter Gleichstrom?
+Gleichstrom (DC, Direct Current) ist ein elektrischer Strom, dessen Stromstärke und Richtung über die Zeit konstant bleiben. Im Gegensatz zum Wechselstrom (AC), der seine Richtung und oft auch seine Stärke periodisch ändert, bleibt beim Gleichstrom alles gleichmäßig. Gleichstrom wird oft in Batterien und Akkumulatoren gefunden und ist für viele elektronische Geräte relevant.
+1.1.47 Gleichstromerzeuger (Beispiele)
+1.1.47 Nennen Sie drei Beispiele für Gleichstromerzeuger.
+Galvanische Zellen, Solarzellen, Thermoelemente, Batterie, Akkumulator, Blitz
+1.1.48 Mischstrom und periodischer Strom (Definition)
+1.1.48 Was versteht man unter einem Mischstrom?
+Bei einem Mischstrom handelt sich um einen Strom, der sowohl Gleichstromanteil als auch Wechselstromanteil besitzt. Ein Beispiel dafür, das Signal, welches durch die Gleichrichtung eines Wechselstroms entsteht.
+1.1.49 Stromarten (Verbraucher)
+1.1.49 Ordnen Sie den Verbrauchern die verwendete Stromart zu: Transformator, Elektrolyse, Glühlampe, Akkumulator, Leuchtstofflampe, Datenübertragung, Funk, Elektrizitätsversorgung, Haushaltsgeräte, LED-Leuchten, Batterien.
+Gleichstrom: Elektrolyse, Akkumulator, Haushaltsgeräte, LED-Leuchten, Batterien
+Wechselstrom: Transformator, Leuchtstofflampe, Elektrizitätsversorgung, Datenübertragung, Funk
+1.1.50 Stromdichte (Formel)
+1.1.50 Definieren Sie die Stromdichte und geben sie die mathematische Formel an.
+Die elektrische Stromdichte 
+ist definiert als die Anzahl elektrischen Ladungsträger pro Flächeneinheit. Also umso mehr Ladungsträger pro Fläche desto höher die Stromdichte.
+Der Zusammenhang zwischen Stromstärke und Stromdichte lautet:
+
+Des Weiteren kann man die elektrische Stromdichte auch über das elektrische Feld und die elektrische Leitfähigkeit berechnen:
+
+1.1.51 Stromdichte (Einheit)
+1.1.51 Leiten Sie die Einheit der elektrische Stromdichte aus der elektrischen Stromstärke her!
+Die Einheit der Stromstärke ist Ampere
+
+
+1.1.52 Stromdichte (Wirkung)
+1.1.52 Wie verändert sich die Temperatur eines Leiters, wenn man die Stromdichte erhöht?
+Wenn man die Stromdichte erhöht, steigt die Temperatur an. Wenn man einen bestimmten Wert der Stromdichte erreicht, bei Kupferkabel zirka 3000
+, spricht man von der Schmelzstromdichte. An diesem Punkt kommt es zum Schmelzen des Leiters.
+1.1.53 Schmelzsicherungen
+1.1.53 Erklären Sie, warum sich bei der Verwendung einer Schmelzsicherung die Zuleitung im Vergleich zur Schmelzsicherung kaum erwärmt?
+Da die Erwärmung im Leiter von der elektrischen Stromdichte abhängig ist und in der Zuleitung der Querschnitt deutlich größer ist ergibt sich beim selben elektrischen Strom eine niedrigere Stromdichte, was wiederum zu weniger Erwärmung führt.
+1.1.54 Stromdichte (maximal zulässig)
+1.1.54 Welche Parameter sind verantwortlich für die höchstzulässige Stromdichte?
+Die höchstzulässige Stromdichte hängt stark vom Material des stromdurchflossenen Werkstoffs ab. Des Weiteren spielt der Wärmeaustausch mit der Umgebung eine wichtige Rolle und zuletzt noch die Querschnittsfläche des Leiters.
+1.1.55 Elektrische Ladung (Definition)
+1.1.55 Definieren Sie die elektrische Ladung. Geben Sie Formelzeichen und Einheit an. Wie hängt diese mit dem elektrischen Strom zusammen?
+Die elektrische Ladung ist eine fundamentale Größe in der Physik. Sie bestimmt die elektromagnetische Wechselwirkung von Materie. Also wie Materie mit elektrischen und magnetische Felder interagiert. Man spricht von zwei Arten der Ladung, positive und negative elektrische Ladung.
+Die elektrische Ladung bzw. die Ladungsmenge wird in der Einheit Coulomb angegeben und es wird als Formelzeichen ein Q verwendet.
+Der mathematische Zusammenhang zwischen der elektrischen Ladung und dem elektrischen Strom lautet:
+
+Also der elektrische Strom entspricht der Ladungsänderung pro Zeit.
+1.1.56 Spannung (Einheit)
+1.1.56 Was ist die Einheit der elektrischen Spannung und wie wird sie symbolisiert?
+Die Einheit der elektrischen Spannung ist das Volt, abgekürzt als "V". In Formeln wird die Spannung oft mit dem Buchstaben "U" oder manchmal auch mit "V" repräsentiert. Ein Volt entspricht der Energiemenge von einem Joule pro Coulomb Ladung.
+1.1.57 Spannungswerte
+1.1.57 Geben Sie die Spannungen einer Autobatterie, einer Monozelle, des Wechselstromnetzes und die Spannung im Verbundnetz an.
+Autobatterie: 12V
+Monozelle: 1,5 V
+Wechselstromnetz: 230 V (Effektivspannung)
+Verbundnetze: 220kV-1150kV
+1.1.58 Elektrisches Potential (Definition)
+1.1.58 Was versteht man unter einem elektrischen Potential?
+Unter dem elektrischen Potential versteht man die Fähigkeit eines elektrischen Felds, Arbeit an einer elektrischen Ladung zu verrichten. Da man immer einen Bezugspunkt benötigt, um ein Potential zu definieren, handelt es sich beim elektrischen Potential um eine relative Größe. Üblicherweise wird als Bezugspunkt in der Praxis die Masse verwendet. Des Weiteren spielt der Begriff des elektrischen Potentials in der Praxis keine große Rolle. Hingegen wird der viel nützlichere Begriff der elektrischen Spannung verwendet, was einer Differenz zwischen zwei Potentialpunkten entspricht und damit eindeutig ist.
+1.1.59 Spannungsmessgerät (Anschluss)
+1.1.59 Wie verwendet man ein Spannungsmessgerät in einem Stromkreis?
+Um die Spannung in einem Stromkreis richtig messen zu können, muss man das Spannungsmessgerät parallel zum Verbraucher schalten.
+Enter caption here
+1.1.60 Ampere (Definition)
+1.1.60 Wie ist 1 Ampere definiert?
+Ein Ampere ist jene Stromstärke, die in zwei parallelen 1 Meter auseinander liegenden Leitern eine Kraft von
+pro 1m Leitungslänge hervorruft.
+Enter caption here
+1.1.61 Generator (Spannungserzeugung)
+1.1.61 Wie wird Spannung in einem elektrischen Generator erzeugt?
+Spannung in einem elektrischen Generator wird meist durch elektromagnetische Induktion erzeugt. Dabei wird eine Leiterschleife in einem Magnetfeld gedreht. Durch die Änderung des magnetischen Flusses in der Leiterschleife entsteht eine induzierte elektromotorische Kraft (emf), die eine Spannung verursacht. Diese Spannung treibt dann den elektrischen Strom durch den angeschlossenen Stromkreis. Je nach Bauweise und Anwendungsfall kann der Generator Gleichstrom (DC) oder Wechselstrom (AC) erzeugen. Generell gilt: Je schneller die Drehung und je stärker das Magnetfeld, desto höher die erzeugte Spannung.
+1.1.62 Stromrichtungsänderung (Wirkungen)
+1.1.62 Welche Auswirkungen hat eine Stromrichtungsänderung in elektrochemischen oder elektromagnetischen Systemen?
+Das magnetische Feld eines stromdurchflossen Leiters ist rechts-wendig zugeordnet. Dreht sich die Stromrichtung, verändert sich somit auch das magnetische Feld. Die chemische Wirkung kann sich je nach Stromrichtung auch unterschiedlich auswirken. Dabei können galvanische Zellen und Elektrolyse unterschieden werden.
+1.1.63 Elektrischer Leitwert (Definition)
+1.1.63 Wie ist der elektrische Leitwert definiert?
+Der elektrische Leitwert G ist der Kehrwert des Widerstands (
+). Der Leitwert hat die Einheit S (Siemens) und ist abhängig von den geometrischen Abmessungen und der elektrischen Leitfähigkeit (materialabhängige Konstante).
+Der Leitwert wird folgendermaßen berechnet:
+
+
+
+
+
+1.1.64 Elektrischer Leitwert (Berechnung)
+1.1.64 Gib mehrere Varianten an, um den elektrischen Leitwert zu berechnen!
+
+
+
+
+
+
+
+
+1.1.65 Elektrischer Leitwert (verschiedener Materialien)
+1.1.65 Welche Materialien haben typischerweise einen hohen bzw. niedrigen elektrischen Leitwert?
+Materialien mit hohem elektrischen Leitwert sind in der Regel gute elektrische Leiter. Dazu gehören Metalle wie Kupfer, Silber und Aluminium. Diese Materialien werden oft in elektrischen Leitungen und Schaltungen verwendet, da sie den elektrischen Strom effizient leiten können.
+Im Gegensatz dazu haben Isolatoren wie Gummi, Glas und die meisten Kunststoffe einen sehr niedrigen elektrischen Leitwert. Diese Materialien werden oft als Isolatoren in elektrischen Systemen verwendet, um einen ungewollten Stromfluss zu verhindern.
+Halbleiter wie Silizium und Germanium haben einen Leitwert, der zwischen dem von Leitern und Isolatoren liegt. Ihre Leitfähigkeit kann durch Dotierung und Temperaturänderungen beeinflusst werden, was sie besonders nützlich in elektronischen Bauelementen wie Transistoren und Dioden macht.
+1.1.66 Ohmsches Gesetz (Strom)
+1.1.66 Von welchen Parametern ist die Stromstärke abhängig und wie? Erläutere anhand des ohmschen Gesetzes!
+Laut dem ohmschen Gesetz ist die Stromstärke von zwei Parametern abhängig, nämlich Spannung und Widerstand. Will man die Stromstärke darstellen ergibt sich folgender Zusammenhang:
+Angenommen die Spannung steigt von
+auf
+.
+Bei gleichbleibendem Widerstand resultiert somit folgender Strom:
+Daraus ist zu erkennen, dass wenn die Spannung steigt, der Strom ebenfalls linear ansteigt. Da der Widerstand im Nenner des Bruches steht gilt hier der Umkehrschluss. Steigt der Widerstand an sinkt die Stromstärke proportional dazu.
+1.1.67 Widerstand (Definition)
+1.1.67 Wie ist das Ohm definiert?
+Ein Ohm ist als Widerstandswert eines Leiters definiert, bei dem eine Spannung von 1 V einen Strom von 1 Ampere treibt. Ohm wird folgender maßen in SI-Basisgrößen ausgedrückt:
+1.1.68 Widerstand (Erwärmung)
+1.1.68 Beschreibe die Temperaturabhängigkeit von Metallen!
+Mit steigender Temperatur nimmt auch der Widerstandswert von Metallen zu. Der Widerstandswert des erwärmten Widerstands ist dabei vom materialspezifischen Temperaturkoeffizienten
+und der Temperaturänderung
+abhängig.
+Der Wert des erwärmten Widerstandes lässt sich folgendermaßen berechnen:
+1.1.69 Leiter (temperaturabhängig)
+1.1.69 Wie werden Leiter, deren Widerstand mit steigender Temperatur abnimmt bezeichnet? Wie werden diese hergestellt und wo werden sie eingesetzt?
+Sie werden Heißleiter, Thermistoren, oder auch (wegen dem negativen Temperaturkoeffizienten) NTC-Widerstände genannt. Heißleiter werden aus Halbmetallen hergestellt, die auf verschiedenste Art und Weise bearbeitet werden (z.B.: Dotierung mit Metalloxiden). Je nach Verarbeitung können unterschiedliche Widerstandskurven realisiert werden. NTCs werden zum Beispiel als Temperaturfühler eingesetzt.
+1.1.70 Heißleiter und Kaltleiter
+1.1.70 Beschreibe die Unterschiede von NTCs und PTCs anhand des Temperaturbeiwerts!
+Heißleiter haben einen negativen, Kaltleiter einen positiven Temperaturbeiwert. Daraus resultiert auch das unterschiedliche Verhalten bei Temperaturänderungen. Durch den negativen Temperaturbeiwert sinkt der Widerstandswert eines Heißleiters mit steigender Temperatur. Im Gegensatz dazu steigt der Widerstandswert eines Kaltleiters mit steigender Temperatur.
+1.1.71 Metalllegierungen (Widerstand)
+1.1.71 Nenne drei Legierungen mit geringer Temperaturabhängigkeit und deren Zusammensatzung!
+Konstantan: 54% Kupfer, 45% Nickel, 1% Mangan
+Isabellin: 84% Kupfer, 13% Mangan, 3% Aluminium
+Manganin: 82-84% Kupfer, 12-15% Mangan, 2-4% Nickel
+1.1.72 Widerstandswerkstoff (Anforderung)
+1.1.72 Wie sollte der Widerstandswerkstoff eines Drahtwiderstands gewählt werden? Begründung!
+Da der Drahtwiderstand aus einem aufgewickelten Draht besteht ist dessen Widerstandswert vom spezifischen Widerstand und den Abmessungen bestimmt (
+). Um Material einzusparen und elektrische und mechanische Festigkeit möglichst hochzuhalten (Länge einsparen und nicht zu dünner Querschnitt) ist es wichtig, ein Material mit hohem spezifischem Widerstand zu wählen. Um den Widerstand möglichst temperaturunabhängig zu halten, ist ein geringer Temperaturbeiwert wünschenswert.
+1.1.73 Widerstand-Farbcode (Farbenziffern)
+1.1.73 Welche Farben beschreiben die Ziffern 0 bis 9 des Widerstandfarbcodes?
+Schwarz: 0
+Braun: 1
+Rot: 2
+Orange: 3
+Gelb: 4
+Grün: 5
+Blau: 6
+Violett: 7
+Grau: 8
+Weiß: 9
+1.1.74 Widerstand-Farbcode (Ringe)
+1.1.74 Welche Informationen können aus einem Widerstand mit fünf Farbringen herausgelesen werden?
+Die ersten drei Ringe beschreiben die ersten drei Ziffern des Widerstandwerts. Der vierte Ring ist der Multiplikator (100 bis 109). Die ersten vier Ringe geben somit den Widerstandswert vollständig an. Der 5. Ring zeigt die Toleranz an (Gold: 5%, Silber: 10%). Somit gibt der 5. Ring eine spezifische Toleranz an. Dieser muss nicht immer vorhanden sein. Bei Widerständen mit nur 3 Ringen gibt der 3. Ring den Multiplikator an und die Toleranz beträgt 20%.
+1.1.75 Widerstand-Farbcode (Bestimmung)
+1.1.75 Gib den Widerstandswert für den gegebenen Widerstand (Gelb, Violett, Orange und Gold) an!
+Enter caption here
+Der erste Ring bildet die Zehnerstelle, der zweite die Einerstelle, der dritte den Multiplikator und der letzte die Toleranz.
+Gelb: 4
+Violett: 7
+Orange: *1000
+Gold:
+5%
+
+1.1.76 Bemessungsleistung (Definition)
+1.1.76 Wie ist die Bemessungsleistung (Nennleistung) eines Verbrauchers definiert?
+Die Bemessungsleistung (Nennleistung) ist die angegebene Leistung eines Verbrauchers, bei der dieser schadenfrei im Dauerbetrieb betrieben werden kann. Die Leistung ist dabei vom fließenden Strom und der angelegten Spannung abhängig (
+).
+1.1.77 Stromzähler
+1.1.77 Welche physikalische Größe wird mittels eines Stromzählers gemessen?
+Der Stromzähler misst die elektrische Arbeit.
+1.1.78 Energie (Definition)
+1.1.78 Wie ist die Energie definiert?
+Energie ist die Fähigkeit, Arbeit zu verrichten. Energie kann weder erzeugt noch vernichtet werden. Es kann lediglich eine Energieform in eine andere umgewandelt werden (z.B.: Generator wandelt mechanische in elektrische Energie um). Es gilt der Energieerhaltungssatz.
+1.1.79 Energiearten
+1.1.79 Nenne alle Energiearten!
+Elektrische Energie
+mechanische Energie
+chemische Energie
+Lichtenergie
+Wärmeenergie
+Kernenergie
+1.1.80 Wirkungsgrad (Definition)
+1.1.80 Wie ist der Wirkungsgrad definiert?
+Der Wirkungsgrad gibt das Verhältnis von Nutzleistung und zugeführter Leistung an. Somit ist der Wirkungsgrad ein Maß für die Effizienz einer Maschine.
+
+Fallen mehr als ein Wirkungsgrad an müssen diese multipliziert werden, um den gesamten Wirkungsgrad zu berechnen (z.B.: Motor, Getriebe).
+
+1.1.81 Leistungshyperbel (Definition)
+1.1.81 Was beschreibt die Leistungshyperbel eines Bauelements?
+Die Leistungshyperbel ist eine charakteristische Kennlinie eines Bauelement.
+Die Kennlinie ergibt sich aus folgendem Zusammenhang:
+Dabei ist die maximale Verlustleistung eine konstante Größe und die Spannung eine veränderliche Größe. Stellt man diese Funktion graphisch dar, entsteht der Graph einer Hyperbel, welcher namensgebend ist.
+1.1.82 Supraleitung (Definition)
+1.1.82 Was ist die Besonderheit von Supraleitern?
+Supraleiter verlieren bei Temperaturen in der Nähe des absoluten Nullpunktes (0 K = -273,15 °C) sprunghaft ihren elektrischen Widerstand. Das Erreichen dieser Temperaturen ist jedoch meist mit sehr hohem Energieaufwand verbunden. Supraleiter ermöglichen sehr große Ströme, praktisch ohne Verluste. Daher kommen sie z.B. in Teilchenbeschleunigern zum Einsatz.
+1.1.83 Heißleiter (Arten)
+1.1.83 In welche Typen werden Heißleiter unterteilt und warum?
+Eigenerwärmte Heißleiter werden vom fließenden Strom erwärmt. Im Gegensatz dazu werden fremderwärmte Heißleiter durch die Außentemperatur erwärmt.
+1.1.84 Heißleiter (fremderwärmt)
+1.1.84 Wo und warum werden fremderwärmte Heißleiter eingesetzt?
+Fremderwärmte Heißleiter werden hauptsächlich zur Temperaturmessung und zur Kompensation von positiven Temperaturkoeffizienten in elektronischen Schaltungen eingesetzt. Die Temperaturmessung ist aus dem Grund möglich, da der Widerstand vom fließenden Strom nicht beeinflusst wird. Nur die externe Temperaturänderung verändert den Widerstandswert.
+1.1.85 Kaltleiter (Verhalten)
+1.1.85 Wie verändert sich der elektrische Widerstand eines Kaltleiters (PTC, Positive Temperature Coefficient) bei Erwärmung?
+Ein Kaltleiter, auch als PTC-Widerstand bekannt, zeichnet sich durch einen positiven Temperaturkoeffizienten aus. Das bedeutet, dass sein elektrischer Widerstand mit steigender Temperatur zunimmt. Bei Erwärmung wird die Beweglichkeit der Ladungsträger im Material eingeschränkt, wodurch der elektrische Widerstand ansteigt.
+Dieses Verhalten ist genau entgegengesetzt zu dem von Heißleitern (NTC, Negative Temperature Coefficient), bei denen der Widerstand mit steigender Temperatur abnimmt. Kaltleiter werden oft als Überstromschutz in elektrischen Schaltungen verwendet. Sobald die Temperatur (und damit der Strom) zu hoch wird, steigt der Widerstand stark an und begrenzt dadurch den Stromfluss.
+1.1.86 Kaltleiter (Anwendung)
+1.1.86 Wo werden Kaltleiter eingesetzt?
+Haupteinsatzgebiet ist die thermische Überwachung von z.B. Motoren, Generatoren oder Transformatoren. Des weiteren werden Kaltleiter als Messfühler für Flüssigkeiten und Gasströmungen oder Schnellstarter von Leuchtstofflampen eingesetzt.
+1.1.87 Varistor
+1.1.87 Was ist die Funktion eines Varistors? Skizziere die UI-Kennlinie!
+Der Varistor ist ein spannungsabhängiger Widerstand. Durch das Anlegen einer Spannung nimmt die Sperrschicht eines Varistors ab und somit sinkt der Widerstand.
+Enter caption here
+1.1.88 Spannungsmessgerät (Messbereichserweiterung)
+1.1.88 Wie kann eine Messbereichserweiterung bei einem Spannungsmessgerät durchgeführt werden?
+Wenn eine Spannung erwartet wird, die höher als der momentane Messbereich ist, muss der Messbereich erweitert werden, um das Gerät zu schützen. Bei Spannungsmessgeräten wird das mittels serieller Vorschaltung eines Widerstandes erreicht.
+1.1.89 Spannungsmessgerät (Kenngröße)
+1.1.89 Wozu wird die Kenngröße Ω/V bei Spannungsmessgeräten angegeben?
+Sie dient zur Berechnung des Instrumentenwiderstands in den unterschiedlichen Spannungsbereichen eines Multimeters.
+1.1.90 Spannungsabfall (Definition)
+1.1.90 Wie ist der Spannungsabfall an einer Leitung definiert?
+Der Spannungsabfall an einer Leitung ist jener Spannungsbetrag, der aufgrund des Leitungswiderstands verloren geht. Die Spannung kann folgendermaßen berechnet werden:
+1.1.91 Spannungsabfall (Verluste)
+1.1.91 Was bewirkt der Spannungsabfall an der Leitung?
+Durch den Spannungsabfall an den Leitern entsteht ein Spannungsverlust am Verbraucher. Sehr lange und hochohmige Leitungen können somit die Spannung, die endgültig am Verbraucher ankommt stark beeinflussen. Bei sehr sensiblen Verbrauchern kann dies Störungen bzw. einen Leistungseinbruch verursachen.
+1.1.92 Spannungsabfall (Größe)
+1.1.92 Von welchen physikalischen Größen ist der Spannungsabfall in Leitungen abhängig?
+Der Spannungsverlust kann folgendermaßen berechnet werden:
+Somit ist der Spannungsabfall von den physikalischen Eigenschaften des Leiters, dem Leiterquerschnitts, der Leiterlänge und der Stromstärke abhängig.
+1.1.93 Energieübertragung (Freileitung)
+1.1.93 Warum erfolgt die Übertragung elektrischer Energie oft über Freileitungen? (Ergänzt)
+Die Übertragung über Freileitungen ist oft kostengünstiger und einfacher zu bauen und zu warten als unterirdische Kabel. Zudem ermöglichen Freileitungen die Übertragung bei hohen Spannungen, was den Stromfluss reduziert und damit die Energieverluste minimiert. Das ist besonders effizient für die Übertragung über große Entfernungen. Nachteile sind Wetteranfälligkeit und mögliche negative Umweltauswirkungen.
+1.1.94 Parallelschaltung (Teilströme)
+1.1.94 Wie teilt sich der Strom an einer Parallelschaltung auf?
+Der Strom geht immer den Weg des geringsten Widerstands. Das erklärt auch, warum im Falle eines Kurzschlusses der ganze Strom über die Drahtbrücke fließt. Bei einer Parallelschaltung von zwei Widerständen fließt somit beim niedrigeren Widerstand der höhere Strom und umgekehrt. Daraus lässt sich folgender Zusammenhang herleiten:
+1.1.95 Elektrische Verbraucher (Verschaltung ans Netz)
+1.1.95 Welchen Vorteil bring die Parallelschaltung von Verbrauchern im Gegensatz zur Serienschaltung mit sich?
+Die meisten Verbraucher haben 230V oder 400V als Nennspannung. Um nun mehrere Verbraucher von einer Quelle aus betreiben zu können ist es essenziell diese parallel zu schalten, da bei einer Parallelschaltung an allen Parallelzweigen dieselbe Spannung anliegt. Im Gegensatz dazu würde sich bei einer Serienschaltung die Spannung je nach Innenwiderstand der Geräte aufteilen und es wäre eine viel höhere Quellspannung nötig. Des Weiteren ist die Betriebssicherheit im Fall einer Unterbrechung bei der Parallelschaltung viel höher, da sich diese nicht auswirkt. Passiert eine Unterbrechung bei einer Serienschaltung, z.B. Ausfall einer Lampe bei einer Lichterkette, wird keine einzige Lampe mehr mit Strom versorgt.
+1.1.96 Widerstandsbestimmung (E12-Widerstandswert)
+1.1.96 Es wurde ein Vorwiderstand berechnet, um den Basisstrom eines Transistors zu begrenzen. Es wird ein Widerstand von 16.5
+benötigt. Welcher E12-Widerstandswert muss gewählt werden?
+Da es keinen 16,5
+Widerstand in der E12-Reihe gibt, werden die nächstgelegenen Werte 15 und 18
+genommen. Bei der endgültigen Wahl sollte beachtet werden, dass falls der Kleinere gewählt wird, kein zu großer Strom, der zu thermischen Schäden führen kann, fließt und falls der Größere gewählt wird, der Transistor auch wirklich durchschaltet.
+1.1.97 Betriebskosten (Motor)
+1.1.97 Berechne die jährlichen Betriebskosten eines Elektromotors!
+Ein Motor gibt einen Mechanische Leistung von 
+ ab. Der Wirkungsgrad der Maschine beträgt 
+. Der Motor wird 
+ Tage im Jahr 
+ Stunden betrieben. Eine Kilowattstunde kostet im Schnitt 16 Cent. Wieviel kostet der Betrieb des Motors pro Jahr in Euro?
+Da nur die mechanische Leistung gegeben ist, muss im ersten Schritt die tatsächlich zugeführte Leistung berechnet werden, da das die Leistung ist, welche verrechnet wird.
+
+Da der Energiebetreiben immer die verbrauchte Leistung über den verwendeten Zeitraum verrechnet ist im nächsten Schritt die verbrauchte Energie zu berechnen:
+
+
+Aus der verbrauchten Energie und dem gegebenen Kostensatz lassen sich nun die Gesamtkosten berechnen:
+
+1.1.98 Widerstandszunahme (Temperaturerhöhung)
+1.1.98 Wie kann die temperaturabhängige Widerstandserhöhung berechnet werden?
+
+
+
+
+
+
+1.1.99 Mechanische Arbeit (Formel)
+1.1.99 Wie ist die mechanische Arbeit definiert?
+Die mechanische Arbeit berechnet sich aus der Kraft F, die über eine Strecke s aufgewendet wird und wird folgender maßen berechnet:
+Die Einheit der Arbeit ist ein Joule oder auch Newtonmeter.
+1.1.100 Leistung (Formel)
+1.1.100 Gib die Formel zu Berechnung der Leistung über Arbeit und Zeit an!
+
+
+1.1.101 Stromkreis (Elemente)
+1.1.101 Nenne die Elemente des Stromkreises!
+Erreger: Wandelt eine Energieform in elektrische Energie um.
+(Generator aus mech. Energie, Photovoltaik aus Lichtenergie)
+
+Verbraucher: Wandelt elektrische Energie in eine andere Energieform um.
+(Motor in mech. Energie, Heizung in Wärmeenergie)
+Übertragungseinrichtungen: Dienen zum Transport und Verteilung der elektrischen Energie.
+Enter caption here
+1.1.102 Stromkreis (Definition)
+1.1.102 Was ist ein Stromkreis?
+Ein Stromkreis ist ein geschlossener Weg, über den der Strom fließt. Ein Stromkreis besteht immer aus mindestens einem Erzeuger (Generator, Spannungsquelle, ...), einer Übertragungseinheit (Hochspannungsleitung, Steckverbindung, ...) und mindestens einem Verbraucher (Widerstand, Motor, ...). Die Darstellung aller Elemente eines Stromkreises erfolgt mit genormten Symbolen.
+1.1.103 Bohrsches Atommodel (Erklärung)
+1.1.103 Was besagt das Bohrsche Atommodell?
+Das Bohrsche Atommodell, vorgestellt von Niels Bohr im Jahr 1913, stellt Atome als ein kleines, positiv geladenes Kernzentrum dar, um das Elektronen in festgelegten Bahnen (Schalen) kreisen. Jede dieser Bahnen entspricht einem bestimmten Energieniveau. Elektronen können zwischen diesen Energiestufen wechseln, indem sie Energie in Form von Photonen absorbieren oder emittieren.
+Das Modell war ein Durchbruch, weil es die Spektrallinien von Wasserstoff erklären konnte. Allerdings hat es seine Grenzen, vor allem bei komplexeren Atomen. Für diese sind modernere Modelle wie das Quantenmechanische Modell nötig.
+1.1.104 Elementarladung (Proton/Elektron)
+1.1.104 Was ist die Elementarladung eines Protons und eines Elektrons?
+Die Elementarladung ist die kleinste Ladungseinheit und hat den Wert von etwa 1.602176634×10−19 Coulomb. Protonen und Elektronen tragen jeweils eine Elementarladung, jedoch mit entgegengesetztem Vorzeichen. Das Proton hat eine positive Elementarladung (+e), während das Elektron eine negative Elementarladung (-e) hat.
+In der Praxis bedeutet dies, dass Protonen und Elektronen die gleiche "Menge" an Ladung besitzen, aber mit entgegengesetzter Polarität.
+1.1.105 Bindungsarten
+1.1.105 Welche drei grundlegenden chemischen Bindungsarten gibt es?
+Die drei grundlegenden chemischen Bindungsarten sind die ionische Bindung, die kovalente Bindung und die metallische Bindung.
+Ionische Bindung: Diese entsteht durch die Übertragung von Elektronen von einem Atom auf ein anderes. Dadurch entstehen positiv und negativ geladene Ionen, die durch elektrostatische Kräfte zusammengehalten werden. Typisches Beispiel: Natriumchlorid (NaCl).
+Kovalente Bindung: Hier teilen sich zwei Atome ein oder mehrere Elektronenpaare, um ihre äußeren Elektronenschalen zu vervollständigen. Wasser (H₂O) ist ein gutes Beispiel dafür.
+Metallische Bindung: In metallischen Bindungen bewegen sich die Valenzelektronen frei zwischen einem "Gitter" von Metallionen. Dies ist der Grund für viele metallische Eigenschaften wie elektrische Leitfähigkeit und Duktilität.
+Jede Bindungsart hat ihre eigenen charakteristischen Eigenschaften und Anwendungen, und oft treten Mischformen dieser Bindungen in komplexeren Materialien auf.
+1.1.106 Strom (Definition)
+1.1.106 Was ist Strom?
+Strom ist die Bewegung freier Ladungsträger (Elektronen).
+Durch einen Querschnitt im Leiter fließen in einer bestimmten Zeit t, eine bestimmte Anzahl n an Ladungsträgern.
+
+
+
+1.1.107 Spannung (Erzeugung)
+1.1.107 Wie wird elektrische Spannung erzeugt und wofür ist sie verantwortlich?
+Positive und negative Ladungsträger ziehen einander stark an. Durch das Trennen dieser Ladungsträger entsteht eine elektrische Spannung. Sie ist die stromtreibende Kraft und somit für den Stromfluss verantwortlich. Ohne ständiges Trennen von Ladungen (z.B. in Batterie) wäre keine Spannung vorhanden und dadurch auch kein Stromfluss möglich.
+1.1.108 Spannung (Arten)
+1.1.108 Welche Spannungsarten gibt es?
+Gleichspannung:
+Der Wert der Spannung ist konstant, kommt z.B. in elektronischen Geräten und Steuerungen zur Anwendung
+Wechselspannung:
+Die Höhe und Polarität der Spannung ändern sich periodisch, kommt z.B. bei der Hausinstallation oder bei Drehstrommotoren (Sonderform: drei zeitlich versetzte Wechselsignale) zur Anwendung
+1.1.109 Widerstand (Bauteil)
+1.1.109 Wann wird der Widerstand als Bauteil verwendet?
+Der Widerstand wird verwendet um:
+einen Strom zu begrenzen (Vorwiderstand zum Schutz von z.B. Dioden)
+eine Spannung zu verändern (allgemeine Anpassung der Spannung durch Spannungsteiler)
+einen Spannungsabfall oder Wärme zu erzeugen (z.B. Heizelemente)
+1.1.110 Stromkreis (Bauteile)
+1.1.110 Aus welchen Teilen besteht ein Stromkreis?
+Ein Stromkreis besteht aus Leitern, welche meist aus leitfähigen Metallen bestehen, aus Spannung- und Stromquellen meist Generatoren oder Akkus und Verbrauchern meist Lampen oder Spulen.
+1.1.111 Potentiometer (Definition)
+1.1.111 Was ist ein Potentiometer?
+Ein Potentiometer ist ein elektrisches Widerstandselement, dessen Widerstandswert mechanisch verändert werden kann. Ein Potentiometer besitzt drei Anschlüsse. Zwei Anschlüsse sind für den Widerstand. Der dritte Kontakt ist der Schleifer, über den der gewünschte Widerstandswert abgegriffen werden kann.
+1.1.112 Potentiometer (Funktionsweise)
+1.1.112 Wie ist ein Potentiometer vereinfacht aufgebaut?
+Ein Potentiometer hat normalerweise 3 Anschlüsse, 2 davon sind die Enden des Widerstandes, wodurch dauerhaft der gesamte Widerstand abgegriffen werden kann. Der dritte Anschluss ist mit dem Schleifer verbunden, wodurch man den variablen Widerstand abgreifen kann. Vereinfacht sieht das Innere eines Potentiometers aus wie ein Spannungsteiler mit zwei variablen Widerständen, wobei der Schleifer diese zwei Widerstände unterteilt.
+Enter caption here
+1.1.113 Potentiometer (Ausführungsarten)
+1.1.113 Welche Ausführungsarten eines Potentiometers gibt es?
+Es gibt einen Drehregler welche meist bei alten Radios als Lautstärkenregelung verwendet wurden. Hier gibt es für sehr genaue Anwendungen auch sogenannte Trimmpotentiometer. Außerdem gibt Schiebepotentiometer, welche meist im Tonstudio bei Mischpulten verwendet werden.
+1.1.114 Drahtpotentiometer (Beschreibung)
+1.1.114 Beschreibe, wie ein Drahtpotentiometer aufgebaut ist.
+Ein Drahtpotentiometer hat einen Keramikkörper, der mit einem Widerstandsdraht umwickelt wird. Durch einen Schleifer, welcher entlang des Körpers verschoben werden kann, kann der Widerstandswert verändert werden.
+Enter caption here
+1.1.115 Wendelpotentiometer (Aufbau)
+1.1.115 Beschreibe, wie ein Wendelpotentiometer aufgebaut ist.
+Bei einem Wendelpotentiometer ist der Widerstandsdraht auf der Außenseite des Bauteiles angebracht. Der Schleifer befindet sich innen. Der Widerstandswert kann sehr genau eingestellt werden. Außerdem kann man mit dem Schleifer mehrere Umdrehungen machen.
+Enter caption here
+1.1.116 Trimmpotentiometer (Beschreibung)
+1.1.116 Beschreibe, wie ein Trimmpotentiometer aufgebaut ist.
+Ein Trimmpotentiometer ist meist ein Drahtpotentiometer, welches jedoch nur durch einen Schraubendreher verstellt werden kann, da das Potentiometer meist zum Abgleichen einer Schaltung oder als Vorwiderstand verwendet wird und nach einmaligen einstellen meist nicht mehr verstellt wird.
+Enter caption here
+1.1.117 Ist-Wert-Geber (Beschreibung)
+1.1.117 Wozu kann ein Potentiometer in der Regelungstechnik verwendet werden?
+Sehr genaue Potentiometer werden in der Regelungstechnik oftmals als Ist-Wert-Geber verwendet. Sie dienen dabei zur Erfassung von Momentanwerten und werden beispielsweise für Winkel- oder Wegmessungen bei Antrieben verwendet.
+1.1.118 Widerstand-Farbcode
+1.1.118 Ein Widerstand hat vier Farbringe. Diese sind der Reihe nach rot, rot, braun und gold. Wie lautet der Wert des Widerstands?
+Enter caption here
+rot
+1. Ziffer 2
+rot
+2.Ziffer 2
+braun
+Multiplikator 10
+gold
+Toleranz +/- 5%
+Daraus folgt ein Widerstandswert von
+.
+1.1.119 Widerstand-Farbcode
+1.1.119 Ein Widerstand hat drei Farbringe. Diese sind der Reihe nach orange, schwarz und orange. Wie lautet der Wert des Widerstands?
+Enter caption here
+orange
+1. Ziffer 3
+schwarz
+2.Ziffer 0
+orange
+Multiplikator 1000
+kein 4. Ring
+Toleranz +/- 20%
+Daraus folgt ein Widerstandswert von
+.
+1.1.120 Widerstand-Farbcode
+1.1.120 Welche Farbringabfolge hat ein Widerstand mit einem Wert von
+und einer Toleranz von 10%?
+Enter caption here
+1.1.121 Widerstand-Farbcode
+1.1.121 Welche Farbringabfolge hat ein Widerstand mit einem Wert von
+und einer Toleranz von 5%?
+Enter caption here
+1.1.122 Widerstand (Bauarten)
+1.1.122 Nach welchen drei Bauarten können Widerstände eingeteilt werden?
+Festwiderstände (z.B.: Drahtwiderstand)
+veränderbare Widerstände (mechanisch, z.B.: Potentiometer)
+veränderbare Widerstände (durch physikalische Größen, z.B.: NTC/PTC)
+1.1.123 Stromdichte
+1.1.123 Wie verhält sich die Stromdichte, wenn bei gleichem Strombetrag nur der halbe Leiterquerschnitt gewählt wird?
+Die Stromdichte verdoppelt sich. Der mathematische Beweis kann folgender maßen durchgeführt werden:
+
+1.1.124 SI-Basisgrößen
+1.1.124 Wie lauten die sieben Basisgrößen und deren Einheiten?
+1.1.125 Ohmsches Gesetz (Einheiten)
+1.1.125 Nenne alle physikalischen Größen, die im ohmschen Gesetz beteiligt sind und gib deren Einheiten an!
+Das ohmsche Gesetz (
+) setzt sich aus den folgenden Größen zusammen:
+I: Strom in A
+U: Spannung in V
+R: Widerstand in
+1.1.126 Zehnerpotenzen (Präfix)
+1.1.126 Gib die Vorsilben für folgende Zehnerpotenzen an:
+
+
+1.1.127 Zehnerpotenzen (Präfix)
+1.1.127 Als welche Zehnerpotenz können die Vorsilben milli, nano und femto geschrieben werden?
+milli:
+nano:
+femto:
+1.1.128 Vorsilben (Umrechnung)
+1.1.128 Ein Widerstand hat einen Wert von 8,2
+Gib den Widerstandswert in Ohm an!
+Der Präfix Mega entspricht der Zehnerpotenz 106. Somit ergibt sich folgender Widerstandswert:
+
+1.1.129 Vorsilben (Umrechnung)
+1.1.129 Wie viele Ampere entsprechen 1000
+Der Präfix Mikro entspricht der Zehnerpotenz 10-6. Somit ergibt sich folgender Stromwert:
+
+1.1.130 Vorsilben (Umrechnung)
+1.1.130 Wie viele Volt entsprechen 3,4kV?
+Der Präfix Kilo entspricht der Zehnerpotenz 103. Somit ergibt sich folgender Spannungswert:
+
+1.1.131 Vorsilben (Vereinfachung)
+1.1.131 Gib folgende Widerstandswerte mit den passenden Vorsilben an!
+1.1.132 Strombereiche
+1.1.132 Welche Stromstärken sind in den folgenden Bereichen üblich?
+LED
+Lebensgefahr
+Fernseher
+Blitz
+ca. 20 mA
+ab 50 mA
+ca. 1 A
+ca. 50 kA
+1.1.133 Spannungserzeugung
+1.1.133 Welche Methoden der Spannungserzeugung gibt es?
+Induktion (Generator)
+chemische Wirkung (galvanische Zelle)
+Wärme (Thermoelement)
+Licht (Solarzelle)
+Druck (Polarisation)
+Reibung (elektrostatische Aufladung)
+1.1.134 Spezifischer Widerstand (Kupfer und Aluminium)
+1.1.134 Wie lautet der spezifische Widerstand von Kupfer und Aluminium?
+Kupfer:
+Aluminium:
+1.1.135 Spezifischer Widerstand
+1.1.135 Was lässt sich aus dem spezifischen Widerstand eines Materials ablesen?
+Der spezifische Widerstand eines Materials sagt aus, wie gut das Material leitet bzw. isoliert. Umso niedriger der spezifische Widerstand ist, desto besser leitet das Material den elektrischen Strom.
+1.1.136 Supraleitung (Anwendung)
+1.1.136 Wo kommt Supraleitung zur Anwendung?
+Besonders bei der Erzeugung sehr starke Magnetfelder spielen Supraleiter eine essenzielle Rolle. Ein praktisches Beispiel dafür sind MRT-Geräte in der Medizintechnik.
+1.1.137 SI-Präfixe
+1.1.137 Nennen Sie die SI-Präfixe!
+Y Yotta 1024
+Z Zetta 1021
+E Exa 1018
+P Peta 1015
+T Tera 1012
+G Giga 109
+M Mega 106
+k Kilo 103
+h Hekto 102
+da Deka 101
+d Dezi 10-1
+c Zenti 10-2
+m Milli 10-3
+u Mikro 10-6
+n Nano 10-9
+p Piko 10-12
+f Femto 10-15
+a Atto 10-18
+z Zepto 10-21
+y Yokto 10-24
+1.1.138 Supraleiter (Kühlung)
+1.1.138 Welche Stoffe werden zur Kühlung von Supraleitern verwendet? 
+Meist flüssiges Helium oder flüssiger Stickstoff. Wobei man mit Helium deutlich niedrigere Temperaturen erreichen kann.
+1.1.139 Supraleiter (Temperatur)
+1.1.139 Wie nennt man die Temperatur, ab der Supraleiter ihren Widerstand verlieren? 
+Die Temperatur, ab der Materialien ihren Widerstand verlieren, nennt man Sprungtemperatur. Da bei dieser Temperatur der Widerstand sehr plötzlich, “sprunghaft”, abnimmt.    
+1.1.140 Leitwert (Einheit)
+1.1.140 Was ist die Einheit des Leitwerts? 
+Die Einheit des Leitwerts ist der Siemens S.
+
+1.1.141 Leitwert und Widerstand
+1.1.141 Wie berechnet man den Leitwert aus dem Widerstand?
+Der Leitwert berechnet sich aus dem Kehrwert des Widerstands, ist also indirekt proportional zum Widerstand. Desto größer der Widerstand, desto kleiner die Leitfähigkeit.
+1.1.142 Schaltungsarten
+1.1.142 Bei welcher Schaltungsart ist der Gesamtwiderstand kleiner als der kleinste Teilwiderstand?
+Parallelschaltung
+Formel:
+1.1.143 Superkondensator
+1.1.143 Was versteht man unter Superkondensatoren?
+Superkondensatoren sind elektrochemische Kondensatoren, welche aufgrund ihrer Bauweise eine besonders hohe Kapazität besitzen. Sie weisen in der Regel Kapazitätswerte von wenigen mF bis zu kF auf.
+1.1.144 Superkondensator/Akkumulator
+1.1.144 Erklären sie den Nachteil von Superkondensatoren gegenüber Akkumulatoren.
+Im Vergleich zu Akkumulatoren haben Superkondensatoren eine geringe Energiedichte. Demnach ist die gespeicherte Gesamtenergie ungefähr 90% niedriger als bei Akkumulatoren. Wiederum ermöglichen es Superkondensatoren in sehr kurzer Zeit, sehr hohe Energien abzugeben oder aufzunehmen. Dadurch spricht man auch davon, dass Superkondensatoren eine sehr hohe Leistungsdichte besitzen.
+1.1.145 Strom im Vakuum
+1.1.145 Kann ein elektrischer Strom im Vakuum fließen?
+Ja, unter folgenden Bedingungen:
+es sind frei bewegliche Ladungsträger vorhanden (Einbringung durch Glüh- oder Fotoemission)
+ein elektrisches Feld muss die Ladungsträger in Bewegung setzen (anlegen einer elektrischen Spannung)
+1.1.146 Kondensator (Anwendung)
+1.1.146 Nennen Sie drei wichtige Anwendungsbereiche für Kondensatoren.
+Energie- bzw. Ladungsspeicher, Filteranwendungen, Informationsspeicherung
+1.1.147 Maxwell-Gleichungen
+1.1.147 Wie viel Maxwell-Gleichungen gibt es und wie lauten sie?
+Die Maxwell-Gleichungen sind ein System von vier linearen partiellen Differentialgleichungen zur Beschreibung der elektromagnetischen Erscheinungen.
+
+1. das Induktionsgesetz:                              
+2. der Satz vom magnetischen Hüllenfluss:  
+3. der Ampere-Maxwell Satz:                     
+4. der Satz vom elektrischen Hüllenfluss:    
+1.1.148 Nabla-Operator
+1.1.148 Wie lautet der Nabla-Operator aus im
+1) kartesischen Koordinatensystem
+2) Zylinderkoordinatensystem
+3) Kugelkoordinatensystem?
+1) kartesisches Koordinatensystem: 
+2) Zylinderkoordinatensystem: 
+3) Kugelkoordinatensystem: 
+
+1.1.149 Nabla Operator (wichtige Anwendungen)
+1.1.149 Wie können wir den Nabla-Operator mit einem Skalarfeld bzw. mit einem Vektorfeld verknüpfen? Wie nennt man die entstehenden Felder?
+1) 
+Das entstehende Feld: Gradient eines Skalarfeldes 
+
+Beispiel: die elektrische Feldstärke lässt sich im (quasi-)elektrostatischen Fall als negativer Gradient des elektrostatischen Potentials darstellen.
+
+
+2) 
+Das entstehende Feld: Divergenz eines Vektorfeldes 
+
+Beispiel: Divergenz eines Feldes können wir uns auch als die Quellendichte des Feldes vorstellen. Die Divergenz der magnetischen Flussdichte ist gleich Null und wir sagen, dass das magnetische Feld quellenfrei ist. 
+
+
+3) 
+Das entstehende Feld: Rotation eines Vektorfeldes
+
+Beispiel: die magnetische Flussdichte können wir als die Rotation des magnetischen Vektorpotentials umrechnen
+
+
+1.1.150 Poynting Satz
+1.1.150 Leite den Poynting Satz her.
+1) das Induktionsgesetz:          
+        
+2) der Ampere-Maxwell-Satz:   
+   
+
+Summieren wir die Gleichungen (1) und (2) =>
+
+
+Für die linke Seite des Ausdrucks sollte man eine mathematische Identität: 
+ =>
+
+
+
+Integrieren wir den Ausdruck über das Volumen =>
+
+
+
+Der Satz von Gauß: 
+- 
+ ist die Hülle des Volumens 
+- 
+ ist der nach außen gerichtete Normalvektor der Hülle
+
+=> 
+
+1.1.151 Poynting-Vektor
+1.1.151 Wie lautet die Formel für den Poynting-Vektor?
+
+
+Die elektromagnetische Energieflussdichte (auch Poynting-Vektor nach dem Entdecker genannt) können wir über das Kreuzprodukt zwischen der elektrischen Feldstärke und magnetischen Feldstärke berechnen.
+1.1.152 Reihenschaltung Kondensator
+1.1.152 Nennen Sie einen Grund für die Reihenschaltung zweier Kondensatoren!
+Wenn die Spannungsfestigkeit eines einzelnen Kondensators für die angebrachte Spannung überschritten wird, ist es sinnvoll einen zweiten Kondensator in Reihe zu schalten, um die Spannung pro Kondensator zu verringern.
+1.1.153 Spannungsquelle (ideal)
+1.1.153 Welcher Parameter ändert sich, wenn an einer idealen Spannungsquelle ein Widerstand angeschlossen wird?
+Bei einer idealen Spannungsquelle wird davon ausgegangen, dass die Versorgungsspannung von der Last nicht beeinflusst wird. Somit verändert sich beim Zuschalten eines Widerstands nur die Stromstärke.
+1.1.154 Akkumulator (Kurzbezeichnung)
+1.1.154 Was versteht man unter der Kurzbezeichnung C10 bei der Kapazitätsangabe des Akkumulators?
+Der C10 Faktor gibt an, welchen Entladestrom der Akku für 10h maximal liefern kann. D.h. wenn ein Akku eine Nennkapazität von 100Ah besitzt, hat er einen C10 von 10A.
+1.1.155 Akkumulator (Entladeschluss-Spannung)
+1.1.155 Erklären Sie den Begriff Entladeschluss-Spannung.
+Unter Entladeschluss-Spannung versteht man die Spannung, ab der, während eines Entladevorgangs keine Energie mehr vom Akku entnommen werden soll/kann.
+1.1.156 Akkumulator (Anfangsspannung)
+1.1.156 Erklären Sie den Begriff Entlade-Anfangsspannung.
+Die Entlade-Anfangsspannung ist definiert, als die Spannung, die nach 10% der Entladezeit vorhanden ist.
+1.1.157 Akkumulator (Ladeschluss-Spannung)
+1.1.157 Erklären Sie den Begriff Ladeschluss-Spannung.
+Die Ladeschluss-Spannung ist die Spannung, die beim Laden eines Akkus an den Klemmstellen anliegt. Beim Erreichen der Ladeschluss-Spannung, wechselt das Ladegerät von Konstantstrom auf Konstntaspannung.
+1.1.158 Akkumulator (Ladeverfahren)
+1.1.158 Welche Ladeverfahren unterscheidet man bei Akkumulatoren?
+Konstantstrom, Pulsladen, Konstantspannung, IU-Ladeverfahren, Rückstromladen
+1.1.159 Akkumulator (Normal-Ladung)
+1.1.159 Erklären Sie den Begriff Normal-Ladung.
+Bei der Normalladung wird der Akkumulator mit einem Ladestrom von 10% der Nennkapazität geladen.
+1.1.160 Akkumulator (IU-Ladeverfahren)
+1.1.160 Was versteht man unter dem IU-Ladeverfahren
+Das IU-Ladeverfahren ist eine Kombination aus Konstantstrom- und Konstntaspannungsladeverfahren. Dabei wird zuerst mit Konstantstrom, und ab der Ladeschlussspannung mit Konstantspannung geladen.
+1.1.161 Akkumulator (Strom-, Spannungsverlauf Normalladung)
+1.1.161 Beschreiben Sie den Strom- und Spannungsverlauf bei Normal-Ladung.
+Zu Beginn des Ladevorgangs ist die Ladespannung niedrig und der Ladestrom groß. Im Verlaufe des Ladevorgangs kehrt sich das Verhältnis um. Es nimmt die Ladespannung stark zu und der Ladestrom sinkt ab.
+1.1.162 Akkumulator (Pufferladung)
+1.1.162 Wozu werden Pufferakkumulatoren eingesetzt?
+In einem Netzwerk kann es passieren, dass es zu kurzen Ausfällen der Versorgungsspannung kommt. Für manche Halbleiterspeicher bedeutet dies den Verlust der gespeicherten Daten. Um das zu verhindern, werden Pufferakkumulatoren eingesetzt, die bei kurzen Ausfällen die Versorgung übernehmen.
+1.1.163 Halbleiter (Einsatzgebiete)
+1.1.163 Wo in der Elektrotechnik haben Halbleiter ihre größte Bedeutung?
+Bedeutung haben Halbleiter für die Elektrotechnik und insbesondere für die Elektronik, wobei die Möglichkeit, ihre elektrische Leitfähigkeit durch Dotierung zu beeinflussen, eine entscheidende Rolle spielt. Dadurch wird es erst möglich Halbleiterbauelemente, wie Transistoren oder Dioden, herzustellen. Diese Bauteile wiederum finden ihren Einsatz in Computern, Handys, Autos und vielen weiteren Produkten.
+1.1.164 Dielektrika (Verwendung)
+1.1.164 Wofür werden die Dielektrika in Kondensatoren verwendet?
+Dielektrika sind elektrisch schwach- oder nichtleitende Substanzen, die bei Kondensatoren eingesetzt werden, um die beiden Kondensatorplatten voneinander elektrisch zu trennen und die maximal speicherbare Energie zu erhöhen.
