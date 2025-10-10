@@ -54,8 +54,6 @@
               geckodriver > geckodriver.log 2>&1 &
               trap "kill $!" EXIT
             fi
-
-            exec nu --login
           '';
         };
       }
