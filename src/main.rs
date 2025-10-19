@@ -32,47 +32,94 @@ struct ContentEntry {
     url_valid: String,
 }
 
-/// Log in using the provided WebDriver.
-pub async fn login(driver: &WebDriver) -> Result<()> {
-    // Try multiple credential file locations
+/// Check if relogin dialog is present
+async fn is_relogin_dialog_present(driver: &WebDriver) -> bool {
+    driver
+        .find(By::Id("neos-ReloginDialog"))
+        .await
+        .is_ok()
+}
+
+/// Handle relogin dialog if present
+async fn handle_relogin_dialog(driver: &WebDriver) -> Result<bool> {
+    if !is_relogin_dialog_present(driver).await {
+        return Ok(false);
+    }
+
+    println!("Relogin dialog detected! Attempting to login again...");
+
+    // Get credentials
+    let credentials = get_credentials()?;
+
+    // Find username field in relogin dialog
+    let username_field = driver
+        .find(By::Name("__authentication[Neos][Flow][Security][Authentication][Token][UsernamePassword][username]"))
+        .await
+        .context("Could not find username field in relogin dialog!")?;
+
+    // Find password field in relogin dialog
+    let password_field = driver
+        .find(By::Name("__authentication[Neos][Flow][Security][Authentication][Token][UsernamePassword][password]"))
+        .await
+        .context("Could not find password field in relogin dialog!")?;
+
+    // Find login button in relogin dialog
+    let login_button = driver
+        .find(By::Css("button.style__btn___3rhzP.style__btn--brand___1ZsvX.style__loginButton___1nLYF"))
+        .await
+        .context("Could not find login button in relogin dialog!")?;
+
+    // Clear existing values and enter credentials
+    username_field.clear().await?;
+    username_field.send_keys(&credentials.0).await?;
+
+    password_field.clear().await?;
+    password_field.send_keys(&credentials.1).await?;
+
+    // Click login button
+    login_button.click().await?;
+
+    // Wait for login to complete
+    support::sleep(Duration::from_secs(3)).await;
+
+    // Check if dialog is gone
+    let login_successful = !is_relogin_dialog_present(driver).await;
+
+    if login_successful {
+        println!("Relogin successful!");
+    } else {
+        println!("Relogin may have failed - dialog still present");
+    }
+
+    Ok(login_successful)
+}
+
+/// Get credentials from files
+fn get_credentials() -> Result<(String, String)> {
     let credential_paths = [
         PathBuf::from("/run/secrets/cms-pswd"),
         PathBuf::from("./credentials.json"),
         PathBuf::from("./config/credentials.json"),
     ];
 
-    let mut credentials = None;
-
     for path in &credential_paths {
         match fs::read_to_string(path) {
             Ok(content) => {
-                println!("Found credential file at: {path:?}");
                 let creds: Credentials = serde_json::from_str(&content).context(
                     "Credentials are not valid JSON with fields 'password' and 'username'",
                 )?;
-                credentials = Some((creds.username, creds.password));
-                break;
+                return Ok((creds.username, creds.password));
             }
             Err(_) => continue,
         }
     }
 
-    let credentials = match credentials {
-        Some(creds) => creds,
-        None => {
-            eprintln!("No credential file found in any of these locations:");
-            for path in &credential_paths {
-                eprintln!("  - {path:?}");
-            }
-            eprintln!("\nPlease create a credentials.json file with the following format:");
-            eprintln!("{{");
-            eprintln!("  \"username\": \"your_username\",");
-            eprintln!("  \"password\": \"your_password\"");
-            eprintln!("}}");
-            eprintln!("\nRecommended location: ./credentials.json (this will be ignored by git)");
-            return Err(anyhow::anyhow!("No credentials file found"));
-        }
-    };
+    Err(anyhow::anyhow!("No credentials file found"))
+}
+
+/// Log in using the provided WebDriver.
+pub async fn login(driver: &WebDriver) -> Result<()> {
+    let credentials = get_credentials()?;
 
     // Find the login elements
     let username_field = driver
@@ -106,6 +153,92 @@ pub async fn login(driver: &WebDriver) -> Result<()> {
     Ok(())
 }
 
+/// Retry wrapper that handles relogin dialogs automatically
+async fn retry_with_relogin<F, Fut, T>(
+    driver: &WebDriver,
+    operation: F,
+    max_retries: usize,
+) -> Result<T>
+where
+    F: Fn() -> Fut,
+    Fut: std::future::Future<Output = Result<T>>,
+{
+    let mut last_error = None;
+
+    for attempt in 0..=max_retries {
+        // Check for relogin dialog before attempting operation
+        if is_relogin_dialog_present(driver).await {
+            println!("Relogin dialog detected before operation attempt {}", attempt + 1);
+            match handle_relogin_dialog(driver).await {
+                Ok(true) => {
+                    println!("Relogin successful, continuing with operation...");
+                    // Give some time for the page to settle after relogin
+                    support::sleep(Duration::from_secs(2)).await;
+                },
+                Ok(false) => {
+                    return Err(anyhow::anyhow!("Relogin dialog present but login failed"));
+                },
+                Err(e) => {
+                    return Err(anyhow::anyhow!("Failed to handle relogin dialog: {}", e));
+                }
+            }
+        }
+
+        // Attempt the operation
+        match operation().await {
+            Ok(result) => return Ok(result),
+            Err(e) => {
+                let error_msg = e.to_string();
+
+                // Check if the error is due to relogin dialog intercepting clicks
+                if error_msg.contains("neos-ReloginDialog") ||
+                   error_msg.contains("element click intercepted") ||
+                   error_msg.contains("ElementClickInterceptedError") {
+
+                    println!("Operation failed due to relogin dialog interference (attempt {})", attempt + 1);
+
+                    if attempt < max_retries {
+                        // Try to handle relogin dialog
+                        match handle_relogin_dialog(driver).await {
+                            Ok(true) => {
+                                println!("Relogin successful, retrying operation...");
+                                support::sleep(Duration::from_secs(2)).await;
+                                continue;
+                            },
+                            Ok(false) => {
+                                println!("Relogin failed, but will retry operation anyway");
+                                support::sleep(Duration::from_secs(1)).await;
+                                continue;
+                            },
+                            Err(relogin_err) => {
+                                println!("Failed to handle relogin: {}", relogin_err);
+                                support::sleep(Duration::from_secs(1)).await;
+                                continue;
+                            }
+                        }
+                    }
+                }
+
+                last_error = Some(e);
+
+                if attempt < max_retries {
+                    println!("Operation failed (attempt {}), retrying in 2 seconds...", attempt + 1);
+                    support::sleep(Duration::from_secs(2)).await;
+                }
+            }
+        }
+    }
+
+    Err(last_error.unwrap_or_else(|| anyhow::anyhow!("All retry attempts failed")))
+}
+
+/// Helper function for common operations that need relogin protection
+async fn safe_click_element(driver: &WebDriver, element: &thirtyfour::WebElement) -> Result<()> {
+    retry_with_relogin(driver, || async {
+        element.click().await.map_err(|e| anyhow::anyhow!("Click failed: {}", e))
+    }, 3).await
+}
+
 async fn find_and_click_folder(driver: &WebDriver, folder_id: &str) -> Result<()> {
     let selector = format!("div[aria-labelledby='{folder_id}']");
     let folder_element = driver
@@ -125,27 +258,49 @@ async fn find_and_click_folder(driver: &WebDriver, folder_id: &str) -> Result<()
 }
 
 async fn expand_folder_if_needed(driver: &WebDriver, folder_id: &str) -> Result<()> {
+    retry_with_relogin(driver, || async {
+        let selector = format!("div[aria-labelledby='{folder_id}']");
+        let folder_element = driver.find(By::Css(&selector)).await.context(format!(
+            "Could not find folder element '{folder_id}'. Make sure you're on the correct page and logged in."))?;
+
+        let expanded = folder_element.attr("aria-expanded").await?;
+        if expanded != Some("true".to_string()) {
+            let toggle_button = folder_element
+                .find(By::Css(
+                    "a.node__header__chevron___zXVME.reset__reset___2e25U",
+                ))
+                .await
+                .context("Could not find toggle button!")?;
+
+            toggle_button.click().await?;
+            support::sleep(Duration::from_secs(1)).await;
+        }
+        Ok(())
+    }, 3).await
+}
+
+async fn is_folder_expandable(driver: &WebDriver, folder_id: &str) -> Result<bool> {
     let selector = format!("div[aria-labelledby='{folder_id}']");
     let folder_element = driver.find(By::Css(&selector)).await.context(format!(
-        "Could not find folder element '{folder_id}'. Make sure you're on the correct page and logged in."))?;
+        "Could not find folder element '{folder_id}'"))?;
 
-    let expanded = folder_element.attr("aria-expanded").await?;
-    if expanded != Some("true".to_string()) {
-        let toggle_button = folder_element
-            .find(By::Css(
-                "a.node__header__chevron___zXVME.reset__reset___2e25U",
-            ))
-            .await
-            .context("Could not find toggle button!")?;
+    // Check if the folder has a chevron button (indicates it's expandable)
+    let chevron_exists = folder_element
+        .find(By::Css("a.node__header__chevron___zXVME"))
+        .await
+        .is_ok();
 
-        toggle_button.click().await?;
-        support::sleep(Duration::from_secs(1)).await;
-    }
-    Ok(())
+    Ok(chevron_exists)
 }
 
 async fn get_folder_children(driver: &WebDriver, folder_id: &str) -> Result<Vec<String>> {
     println!("Getting children for folder: {folder_id}");
+
+    // First check if the folder is expandable
+    if !is_folder_expandable(driver, folder_id).await? {
+        println!("Folder {folder_id} is not expandable (no chevron found)");
+        return Ok(Vec::new());
+    }
 
     expand_folder_if_needed(driver, folder_id).await?;
     support::sleep(Duration::from_millis(2000)).await;
@@ -242,24 +397,36 @@ async fn get_all_descendants(
         all_descendants.push(child_id.clone());
         println!("    Added child: {child_id}");
 
-        match get_folder_children(driver, &child_id).await {
-            Ok(grandchildren) => {
-                if !grandchildren.is_empty() {
-                    println!(
-                        "    Child {} has {} grandchildren, recursing...",
-                        child_id,
-                        grandchildren.len()
-                    );
-                    let descendants =
-                        get_all_descendants(driver, &child_id, max_depth, current_depth + 1)
-                            .await?;
-                    all_descendants.extend(descendants);
-                } else {
-                    println!("    Child {child_id} is a leaf node (no children)");
+        // Check if child is expandable before trying to get its children
+        match is_folder_expandable(driver, &child_id).await {
+            Ok(true) => {
+                // Child is expandable, get its children
+                match get_folder_children(driver, &child_id).await {
+                    Ok(grandchildren) => {
+                        if !grandchildren.is_empty() {
+                            println!(
+                                "    Child {} has {} grandchildren, recursing...",
+                                child_id,
+                                grandchildren.len()
+                            );
+                            let descendants =
+                                get_all_descendants(driver, &child_id, max_depth, current_depth + 1)
+                                    .await?;
+                            all_descendants.extend(descendants);
+                        } else {
+                            println!("    Child {child_id} is expandable but has no children");
+                        }
+                    }
+                    Err(e) => {
+                        println!("    Failed to get children for {child_id}: {e}");
+                    }
                 }
             }
-            Err(_) => {
-                println!("    Child {child_id} appears to be a leaf node or not expandable");
+            Ok(false) => {
+                println!("    Child {child_id} is a leaf node (no chevron indicator)");
+            }
+            Err(e) => {
+                println!("    Could not check if {child_id} is expandable: {e}");
             }
         }
 
@@ -357,7 +524,11 @@ async fn extract_content_from_page(
     println!("  Extracting content from treeitem: {node_id}");
 
     println!("  Clicking treeitem to load content...");
-    find_and_click_folder(driver, node_id).await?;
+
+    // Use retry wrapper to handle relogin dialogs
+    retry_with_relogin(driver, || async {
+        find_and_click_folder(driver, node_id).await
+    }, 3).await?;
 
     println!("  Waiting for page to load after click...");
     support::sleep(Duration::from_secs(5)).await;
@@ -750,6 +921,16 @@ async fn do_bulk_extract(driver: &WebDriver, target_folder_id: &str) -> Result<(
             child_ids.len(),
             child_id
         );
+
+        // Check for relogin dialog before processing each item
+        if is_relogin_dialog_present(driver).await {
+            println!("Relogin dialog detected before processing item {child_id}");
+            match handle_relogin_dialog(driver).await {
+                Ok(true) => println!("Relogin successful, continuing..."),
+                Ok(false) => println!("Relogin failed, but continuing..."),
+                Err(e) => println!("Error handling relogin: {e}, continuing..."),
+            }
+        }
 
         match extract_content_from_page(driver, child_id, validate_urls).await {
             Ok(entries) => {
