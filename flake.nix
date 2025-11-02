@@ -38,6 +38,7 @@
         browserInputs = with pkgs; [
           firefox
           geckodriver
+          netcat
         ];
 
         # Reusable shell hooks
@@ -54,30 +55,30 @@
         '';
 
         geckoShellHook = ''
-          if ! pgrep -x geckodriver > /dev/null; then
-            echo "Starting geckodriver..."
-            geckodriver > geckodriver.log 2>&1 &
-            trap "kill $!" EXIT
+          # Check if geckodriver is already running on default port (4444)
+          if ! ${pkgs.netcat}/bin/nc -z localhost 4444 2>/dev/null; then
+            echo "Starting geckodriver on port 4444..."
+            ${pkgs.geckodriver}/bin/geckodriver > geckodriver.log 2>&1 &
+            echo "Geckodriver started with PID: $!"
+          else
+            echo "Geckodriver is already running on port 4444"
           fi
         '';
 
-        nuShellHook = ''
-          exec nu --login
-        '';
       in {
         devShells = {
           # Default shell with just Rust tools (no geckodriver)
           default = pkgs.mkShell {
             name = "rust-web-crawler-shell";
             buildInputs = lib.flatten [ rustInputs baseInputs ];
-            shellHook = baseShellHook + nuShellHook;
+            shellHook = baseShellHook;
           };
 
           # Shell with geckodriver for browser automation
           gecko = pkgs.mkShell {
             name = "rust-web-crawler-gecko-shell";
             buildInputs = lib.flatten [ rustInputs baseInputs browserInputs ];
-            shellHook = baseShellHook + geckoShellHook + nuShellHook;
+            shellHook = baseShellHook + geckoShellHook;
           };
         };
       }
