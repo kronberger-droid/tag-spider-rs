@@ -10,8 +10,9 @@ static URL: &str = "https://cms.schrackforstudents.com/neos/login";
 
 async fn login(driver: &WebDriver) -> Result<()> {
     // Load credentials from file
-    let credentials_content = std::fs::read_to_string("./credentials.json")
-        .context("Could not read credentials.json. Please create this file with your username and password.")?;
+    let credentials_content = std::fs::read_to_string("./credentials.json").context(
+        "Could not read credentials.json. Please create this file with your username and password.",
+    )?;
 
     #[derive(serde::Deserialize)]
     struct Credentials {
@@ -19,8 +20,8 @@ async fn login(driver: &WebDriver) -> Result<()> {
         password: String,
     }
 
-    let creds: Credentials = serde_json::from_str(&credentials_content)
-        .context("Invalid JSON in credentials.json")?;
+    let creds: Credentials =
+        serde_json::from_str(&credentials_content).context("Invalid JSON in credentials.json")?;
 
     let credentials = (creds.username, creds.password);
 
@@ -172,15 +173,26 @@ async fn get_folder_children(driver: &WebDriver, folder_id: &str) -> Result<Vec<
 }
 
 #[async_recursion]
-async fn get_all_descendants(driver: &WebDriver, folder_id: &str, max_depth: usize, current_depth: usize) -> Result<Vec<String>> {
+async fn get_all_descendants(
+    driver: &WebDriver,
+    folder_id: &str,
+    max_depth: usize,
+    current_depth: usize,
+) -> Result<Vec<String>> {
     let mut all_descendants = Vec::new();
 
     if current_depth >= max_depth {
-        println!("  Reached maximum depth {} for folder: {}", max_depth, folder_id);
+        println!(
+            "  Reached maximum depth {} for folder: {}",
+            max_depth, folder_id
+        );
         return Ok(all_descendants);
     }
 
-    println!("  Traversing folder at depth {}: {}", current_depth, folder_id);
+    println!(
+        "  Traversing folder at depth {}: {}",
+        current_depth, folder_id
+    );
 
     // Get direct children of this folder
     let children = get_folder_children(driver, folder_id).await?;
@@ -195,17 +207,26 @@ async fn get_all_descendants(driver: &WebDriver, folder_id: &str, max_depth: usi
         match get_folder_children(driver, &child_id).await {
             Ok(grandchildren) => {
                 if !grandchildren.is_empty() {
-                    println!("    Child {} has {} grandchildren, recursing...", child_id, grandchildren.len());
+                    println!(
+                        "    Child {} has {} grandchildren, recursing...",
+                        child_id,
+                        grandchildren.len()
+                    );
                     // This child is also a folder, recurse into it
-                    let descendants = get_all_descendants(driver, &child_id, max_depth, current_depth + 1).await?;
+                    let descendants =
+                        get_all_descendants(driver, &child_id, max_depth, current_depth + 1)
+                            .await?;
                     all_descendants.extend(descendants);
                 } else {
                     println!("    Child {} is a leaf node (no children)", child_id);
                 }
-            },
+            }
             Err(_) => {
                 // This child might not be a folder or might not be expandable, that's okay
-                println!("    Child {} appears to be a leaf node or not expandable", child_id);
+                println!(
+                    "    Child {} appears to be a leaf node or not expandable",
+                    child_id
+                );
             }
         }
 
@@ -213,14 +234,20 @@ async fn get_all_descendants(driver: &WebDriver, folder_id: &str, max_depth: usi
         support::sleep(Duration::from_millis(500)).await;
     }
 
-    println!("  Found {} total descendants for folder: {}", all_descendants.len(), folder_id);
+    println!(
+        "  Found {} total descendants for folder: {}",
+        all_descendants.len(),
+        folder_id
+    );
     Ok(all_descendants)
 }
 
 async fn extract_breadcrumb_path(driver: &WebDriver) -> Result<String> {
     // Look for breadcrumb elements in the page
     let breadcrumbs = driver
-        .find_all(By::Css(".neos-breadcrumb a, .breadcrumb a, [class*='breadcrumb'] a"))
+        .find_all(By::Css(
+            ".neos-breadcrumb a, .breadcrumb a, [class*='breadcrumb'] a",
+        ))
         .await?;
 
     if !breadcrumbs.is_empty() {
@@ -348,7 +375,10 @@ async fn extract_content_from_page(
 
         // Check for any elements with 'dynamic' in the class
         if let Ok(dynamic_els) = driver.find_all(By::Css("[class*='dynamic']")).await {
-            println!("  Found {} elements with 'dynamic' in class", dynamic_els.len());
+            println!(
+                "  Found {} elements with 'dynamic' in class",
+                dynamic_els.len()
+            );
             for (i, el) in dynamic_els.iter().enumerate().take(3) {
                 if let Ok(class) = el.attr("class").await {
                     println!("    Dynamic element {}: class='{:?}'", i + 1, class);
@@ -357,7 +387,10 @@ async fn extract_content_from_page(
         }
 
         // Check for external link elements
-        if let Ok(ext_links) = driver.find_all(By::Css("[data-neos-node-type*='ExternalLinks']")).await {
+        if let Ok(ext_links) = driver
+            .find_all(By::Css("[data-neos-node-type*='ExternalLinks']"))
+            .await
+        {
             println!("  Found {} ExternalLinks elements", ext_links.len());
         }
 
@@ -368,22 +401,34 @@ async fn extract_content_from_page(
 
         // Try alternative selectors that might match
         if let Ok(alt1) = driver.find_all(By::Css(".dynamicContent")).await {
-            println!("  Found {} elements with just '.dynamicContent'", alt1.len());
+            println!(
+                "  Found {} elements with just '.dynamicContent'",
+                alt1.len()
+            );
         }
 
         if let Ok(alt2) = driver.find_all(By::Css("[class*='dynamic-content']")).await {
-            println!("  Found {} elements with 'dynamic-content' in class", alt2.len());
+            println!(
+                "  Found {} elements with 'dynamic-content' in class",
+                alt2.len()
+            );
         }
     }
 
     // Extract breadcrumb path
-    let breadcrumb_path = extract_breadcrumb_path(driver).await.unwrap_or_else(|_| "Unknown Path".to_string());
+    let breadcrumb_path = extract_breadcrumb_path(driver)
+        .await
+        .unwrap_or_else(|_| "Unknown Path".to_string());
     println!("  Breadcrumb path: {}", breadcrumb_path);
 
     let mut entries = Vec::new();
 
     for (i, container) in dynamic_containers.iter().enumerate() {
-        println!("  Processing dynamic container {} of {}", i + 1, dynamic_containers.len());
+        println!(
+            "  Processing dynamic container {} of {}",
+            i + 1,
+            dynamic_containers.len()
+        );
         container.scroll_into_view().await?;
         support::sleep(Duration::from_millis(500)).await;
 
@@ -396,10 +441,17 @@ async fn extract_content_from_page(
             .find_all(By::Css("div[data-__neos-fusion-path*='ExternalLinks']"))
             .await?;
 
-        println!("    Found {} divs with ExternalLinks in fusion path", link_container_divs.len());
+        println!(
+            "    Found {} divs with ExternalLinks in fusion path",
+            link_container_divs.len()
+        );
 
         for (j, item) in link_container_divs.iter().enumerate() {
-            println!("    Processing ExternalLinks container div {} of {}", j + 1, link_container_divs.len());
+            println!(
+                "    Processing ExternalLinks container div {} of {}",
+                j + 1,
+                link_container_divs.len()
+            );
             let mut entry = ContentEntry {
                 source_node: node_id.to_string(),
                 breadcrumb_path: breadcrumb_path.clone(),
@@ -498,10 +550,17 @@ async fn extract_content_from_page(
             .find_all(By::Css("div[data-__neos-fusion-path*='YouTube']"))
             .await?;
 
-        println!("    Found {} divs with YouTube in fusion path", youtube_container_divs.len());
+        println!(
+            "    Found {} divs with YouTube in fusion path",
+            youtube_container_divs.len()
+        );
 
         for (j, item) in youtube_container_divs.iter().enumerate() {
-            println!("    Processing YouTube container div {} of {}", j + 1, youtube_container_divs.len());
+            println!(
+                "    Processing YouTube container div {} of {}",
+                j + 1,
+                youtube_container_divs.len()
+            );
             let mut entry = ContentEntry {
                 source_node: node_id.to_string(),
                 breadcrumb_path: breadcrumb_path.clone(),
@@ -578,16 +637,33 @@ async fn main() -> Result<()> {
 
     // Get all descendants (children, grandchildren, etc.) of the target folder
     let max_traversal_depth = 5; // Prevent infinite recursion, adjust as needed
-    println!("Starting recursive traversal with max depth: {}", max_traversal_depth);
-    let child_ids = get_all_descendants(&spider.driver, &target_folder_id, max_traversal_depth, 0).await?;
-    println!("Found {} total items to process (including all descendants)", child_ids.len());
+    println!(
+        "Starting recursive traversal with max depth: {}",
+        max_traversal_depth
+    );
+    let child_ids =
+        get_all_descendants(&spider.driver, &target_folder_id, max_traversal_depth, 0).await?;
+    println!(
+        "Found {} total items to process (including all descendants)",
+        child_ids.len()
+    );
 
     // Create CSV writer
     let mut csv_writer = Writer::from_path(output_file).context("Failed to create CSV file")?;
 
     // Write CSV header
     csv_writer
-        .write_record(&["Source Node", "Breadcrumb Path", "Content Type", "URL", "Title", "Author", "File Type", "Size", "URL Valid"])
+        .write_record([
+            "Source Node",
+            "Breadcrumb Path",
+            "Content Type",
+            "URL",
+            "Title",
+            "Author",
+            "File Type",
+            "Size",
+            "URL Valid",
+        ])
         .context("Failed to write CSV header")?;
 
     let mut all_entries = Vec::new();

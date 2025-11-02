@@ -73,7 +73,6 @@
             buildInputs = lib.flatten [ rustInputs baseInputs ];
             shellHook = baseShellHook;
           };
-
           # Shell with geckodriver for browser automation
           gecko = pkgs.mkShell {
             name = "rust-web-crawler-gecko-shell";
