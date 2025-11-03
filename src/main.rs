@@ -3,12 +3,14 @@ use anyhow::{Context, Result};
 use async_recursion::async_recursion;
 use crossterm::event::{Event, KeyCode};
 use csv::{Reader, Writer};
+use futures::stream::{self, StreamExt};
 use std::io::{self, Write};
 use std::path::PathBuf;
 use std::{collections::HashMap, fs, time::Duration};
 use tag_spider_rs::spider::Spider;
 use tag_spider_rs::tree::FileTree;
 use thirtyfour::{prelude::*, support, By, WebDriver};
+use tokio::time::Instant;
 
 static URL: &str = "https://cms.schrackforstudents.com/neos/login";
 static TAGPATH: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/resources/tags.csv");
@@ -303,7 +305,8 @@ async fn get_folder_children(driver: &WebDriver, folder_id: &str) -> Result<Vec<
     }
 
     expand_folder_if_needed(driver, folder_id).await?;
-    support::sleep(Duration::from_millis(2000)).await;
+    // Reduced from 2000ms to 1000ms
+    support::sleep(Duration::from_millis(1000)).await;
 
     let parent_selector = format!("div[aria-labelledby='{folder_id}']");
     let parent_element = driver
@@ -430,7 +433,8 @@ async fn get_all_descendants(
             }
         }
 
-        support::sleep(Duration::from_millis(500)).await;
+        // Reduced from 500ms to 300ms
+        support::sleep(Duration::from_millis(300)).await;
     }
 
     println!(
@@ -488,8 +492,6 @@ async fn validate_url(url: &str) -> String {
         return "N/A".to_string();
     }
 
-    println!("    Validating URL: {url}");
-
     let client = reqwest::Client::builder()
         .timeout(Duration::from_secs(10))
         .build()
@@ -499,27 +501,76 @@ async fn validate_url(url: &str) -> String {
         Ok(response) => {
             let status = response.status().as_u16();
             if response.status().is_success() {
-                println!("      URL valid ({status})");
                 "Valid".to_string()
             } else if response.status().is_redirection() {
-                println!("      URL redirects ({status})");
                 "Redirect".to_string()
             } else {
-                println!("      URL error ({status})");
                 format!("Error {status}")
             }
         }
-        Err(e) => {
-            println!("      URL validation failed: {e}");
+        Err(_) => {
             "Invalid".to_string()
         }
+    }
+}
+
+/// Validate URLs concurrently in batches
+async fn validate_urls_concurrent(entries: &mut [ContentEntry], concurrency: usize) {
+    let total_urls = entries.len();
+    println!("Validating {} URLs with concurrency {}...", total_urls, concurrency);
+
+    let urls_with_indices: Vec<(usize, String)> = entries
+        .iter()
+        .enumerate()
+        .map(|(i, e)| (i, e.url.clone()))
+        .collect();
+
+    let validated: Vec<(usize, String)> = stream::iter(urls_with_indices)
+        .map(|(idx, url)| async move {
+            let result = validate_url(&url).await;
+            if (idx + 1) % 10 == 0 {
+                println!("  Validated {}/{} URLs", idx + 1, total_urls);
+            }
+            (idx, result)
+        })
+        .buffer_unordered(concurrency)
+        .collect()
+        .await;
+
+    // Update entries with validation results
+    for (idx, validation_result) in validated {
+        entries[idx].url_valid = validation_result;
+    }
+
+    println!("URL validation complete!");
+}
+
+/// Wait for page content to load (matches Spider::wait_content_load)
+async fn wait_for_page_load(driver: &WebDriver, timeout: Duration) -> Result<()> {
+    let start = Instant::now();
+
+    loop {
+        // Check for loading indicators (same as Spider::wait_content_load)
+        let loading_bars = driver
+            .find_all(By::Css(".style__loadingIndicator__container___1yhsy"))
+            .await?;
+
+        if loading_bars.is_empty() {
+            return Ok(());
+        }
+
+        if start.elapsed() > timeout {
+            // Timeout is OK - just proceed
+            return Ok(());
+        }
+
+        support::sleep(Duration::from_millis(500)).await;
     }
 }
 
 async fn extract_content_from_page(
     driver: &WebDriver,
     node_id: &str,
-    validate_urls: bool,
 ) -> Result<Vec<ContentEntry>> {
     println!("  Extracting content from treeitem: {node_id}");
 
@@ -530,8 +581,9 @@ async fn extract_content_from_page(
         find_and_click_folder(driver, node_id).await
     }, 3).await?;
 
-    println!("  Waiting for page to load after click...");
-    support::sleep(Duration::from_secs(5)).await;
+    println!("  Waiting for page to load...");
+    // Wait for loading indicators to disappear (no hardcoded delays)
+    wait_for_page_load(driver, Duration::from_secs(30)).await?;
 
     println!("  Looking for dynamic content containers directly in the page...");
 
@@ -566,7 +618,8 @@ async fn extract_content_from_page(
             dynamic_containers.len()
         );
         container.scroll_into_view().await?;
-        support::sleep(Duration::from_millis(500)).await;
+        // Reduced from 500ms to 300ms
+        support::sleep(Duration::from_millis(300)).await;
 
         println!("    Looking for divs containing ExternalLinks paragraphs...");
 
@@ -663,11 +716,8 @@ async fn extract_content_from_page(
                 println!("      No Size element found");
             }
 
-            if validate_urls {
-                entry.url_valid = validate_url(&entry.url).await;
-            } else {
-                entry.url_valid = "Skipped".to_string();
-            }
+            // URL validation will happen later in batch
+            entry.url_valid = "Pending".to_string();
 
             if !entry.url.is_empty() || !entry.title.is_empty() {
                 entries.push(entry);
@@ -716,11 +766,8 @@ async fn extract_content_from_page(
                 println!("      No YouTube iframe found");
             }
 
-            if validate_urls {
-                entry.url_valid = validate_url(&entry.url).await;
-            } else {
-                entry.url_valid = "Skipped".to_string();
-            }
+            // URL validation will happen later in batch
+            entry.url_valid = "Pending".to_string();
 
             if !entry.url.is_empty() {
                 entries.push(entry);
@@ -852,14 +899,9 @@ async fn bulk_extract_content(driver: &WebDriver) -> Result<()> {
 }
 
 async fn do_bulk_extract(driver: &WebDriver, target_folder_id: &str) -> Result<()> {
-    let validate_urls = ask_yes_no("Do you want to validate URLs? (This may take longer)");
+    let validate_urls = ask_yes_no("Do you want to validate URLs? (This will be done concurrently at the end)");
 
     println!("Starting bulk extraction from folder: {target_folder_id}");
-    if validate_urls {
-        println!("URL validation is enabled - this will check if each URL is accessible");
-    } else {
-        println!("URL validation is disabled - URLs will be marked as 'Skipped'");
-    }
 
     println!("Checking if target folder exists on current page...");
 
@@ -872,7 +914,7 @@ async fn do_bulk_extract(driver: &WebDriver, target_folder_id: &str) -> Result<(
 
     // Wait a bit to ensure page is fully loaded
     println!("Waiting for page to load completely...");
-    support::sleep(Duration::from_secs(3)).await;
+    support::sleep(Duration::from_secs(2)).await;
 
     // Navigate to the target folder and expand it
     expand_folder_if_needed(driver, target_folder_id).await?;
@@ -932,7 +974,7 @@ async fn do_bulk_extract(driver: &WebDriver, target_folder_id: &str) -> Result<(
             }
         }
 
-        match extract_content_from_page(driver, child_id, validate_urls).await {
+        match extract_content_from_page(driver, child_id).await {
             Ok(entries) => {
                 if !entries.is_empty() {
                     println!("✓ Found {} entries in item {}", entries.len(), child_id);
@@ -948,12 +990,13 @@ async fn do_bulk_extract(driver: &WebDriver, target_folder_id: &str) -> Result<(
             }
         }
 
-        support::sleep(Duration::from_millis(1500)).await;
+        // Reduced sleep delay from 1500ms to 800ms
+        support::sleep(Duration::from_millis(800)).await;
     }
 
     // Also extract from the target folder itself
     println!("\nProcessing target folder: {target_folder_id}");
-    match extract_content_from_page(driver, target_folder_id, validate_urls).await {
+    match extract_content_from_page(driver, target_folder_id).await {
         Ok(entries) => {
             if !entries.is_empty() {
                 println!("Found {} entries in target folder", entries.len());
@@ -967,7 +1010,25 @@ async fn do_bulk_extract(driver: &WebDriver, target_folder_id: &str) -> Result<(
         }
     }
 
+    println!("\n=== Content extraction complete! ===");
+    println!("Total entries found: {}", all_entries.len());
+    println!("Successfully processed pages: {successful}");
+    println!("Failed pages: {failed}");
+
+    // Validate URLs concurrently if requested
+    if validate_urls && !all_entries.is_empty() {
+        println!("\n=== Starting concurrent URL validation ===");
+        validate_urls_concurrent(&mut all_entries, 15).await;
+    } else if !validate_urls {
+        // Mark all as skipped
+        for entry in &mut all_entries {
+            entry.url_valid = "Skipped".to_string();
+        }
+        println!("URL validation skipped by user");
+    }
+
     // Write all entries to CSV
+    println!("\nWriting results to CSV...");
     for entry in &all_entries {
         csv_writer
             .write_record([
@@ -986,10 +1047,7 @@ async fn do_bulk_extract(driver: &WebDriver, target_folder_id: &str) -> Result<(
 
     csv_writer.flush().context("Failed to flush CSV writer")?;
 
-    println!("\n=== Bulk extraction complete! ===\n");
-    println!("Total entries found: {}", all_entries.len());
-    println!("Successfully processed pages: {successful}");
-    println!("Failed pages: {failed}");
+    println!("\n=== Bulk extraction complete! ===");
     println!("CSV output saved to: {output_file}");
 
     Ok(())
