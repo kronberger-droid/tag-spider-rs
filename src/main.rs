@@ -475,6 +475,7 @@ async fn extract_breadcrumb_path(driver: &WebDriver) -> Result<String> {
 }
 
 fn extract_youtube_video_id(url: &str) -> Option<String> {
+    // Extract video ID from YouTube embed URL like: https://www.youtube.com/embed/H7WzSiZOauA?wmode=transparent&hl=de&rel=0
     if let Some(start) = url.find("/embed/") {
         let after_embed = &url[start + 7..];
         if let Some(end) = after_embed.find('?') {
@@ -482,9 +483,332 @@ fn extract_youtube_video_id(url: &str) -> Option<String> {
         } else {
             Some(after_embed.to_string())
         }
+    }
+    // Extract video ID from YouTube watch URL like: https://www.youtube.com/watch?v=HGk7PYSJEsM
+    else if let Some(start) = url.find("watch?v=") {
+        let after_v = &url[start + 8..];
+        if let Some(end) = after_v.find('&') {
+            Some(after_v[..end].to_string())
+        } else {
+            Some(after_v.to_string())
+        }
     } else {
         None
     }
+}
+
+async fn navigate_to_node(driver: &WebDriver, node_id: &str) -> Result<()> {
+    println!("  Clicking treeitem to load content...");
+    find_and_click_folder(driver, node_id).await?;
+    println!("  Waiting for page to load after click...");
+    support::sleep(Duration::from_secs(5)).await;
+    Ok(())
+}
+
+async fn find_content_context(driver: &WebDriver) -> Result<bool> {
+    println!("  Looking for content in main context...");
+
+    // Try to find content in main context first
+    let main_containers = driver
+        .find_all(By::Css(".dynamicContent.dynamic-content-container-1"))
+        .await?;
+    let main_articles = driver
+        .find_all(By::Css(
+            "article[data-__neos-fusion-path*='Plan2net.Schrack4students:Tutorials']",
+        ))
+        .await?;
+
+    if !main_containers.is_empty() || !main_articles.is_empty() {
+        println!("  Found content in main context");
+        return Ok(false); // Not in iframe
+    }
+
+    // Try iframes
+    let iframes = driver.find_all(By::Tag("iframe")).await?;
+    println!("  Found {} iframes on the page", iframes.len());
+
+    for i in 0..iframes.len() {
+        println!("  Attempting to enter iframe {}...", i);
+        match driver.enter_frame(i as u16).await {
+            Ok(_) => {
+                println!("  Successfully entered iframe {}", i);
+
+                // Check if content is in this iframe
+                let iframe_containers = driver
+                    .find_all(By::Css(".dynamicContent.dynamic-content-container-1"))
+                    .await?;
+                let iframe_articles = driver
+                    .find_all(By::Css(
+                        "article[data-__neos-fusion-path*='Plan2net.Schrack4students:Tutorials']",
+                    ))
+                    .await?;
+
+                if !iframe_containers.is_empty() || !iframe_articles.is_empty() {
+                    println!("  Found content in iframe {}", i);
+                    return Ok(true); // In iframe
+                }
+
+                // Content not in this iframe, exit and try next
+                driver.enter_default_frame().await?;
+            }
+            Err(e) => {
+                println!("  Failed to enter iframe {}: {}", i, e);
+            }
+        }
+    }
+
+    // No content found anywhere
+    println!("  No content found in any context");
+    Ok(false)
+}
+
+async fn extract_external_links(
+    container: &WebElement,
+    node_id: &str,
+    breadcrumb_path: &str,
+) -> Result<Vec<ContentEntry>> {
+    let mut entries = Vec::new();
+
+    println!("    Looking for divs containing ExternalLinks paragraphs...");
+    let link_container_divs = container
+        .find_all(By::Css("div[data-__neos-fusion-path*='ExternalLinks']"))
+        .await?;
+
+    println!(
+        "    Found {} divs with ExternalLinks in fusion path",
+        link_container_divs.len()
+    );
+
+    for (j, item) in link_container_divs.iter().enumerate() {
+        println!(
+            "    Processing ExternalLinks container div {} of {}",
+            j + 1,
+            link_container_divs.len()
+        );
+        let mut entry = ContentEntry {
+            source_node: node_id.to_string(),
+            breadcrumb_path: breadcrumb_path.to_string(),
+            content_type: "ExternalLink".to_string(),
+            url: String::new(),
+            title: String::new(),
+            author: String::new(),
+            file_type: String::new(),
+            size: String::new(),
+            url_valid: String::new(),
+        };
+
+        // Extract URL
+        println!("      Looking for URL...");
+        if let Ok(url_element) = item.query(By::Css("p[property='typo3:url']")).first().await {
+            if let Ok(url) = url_element.text().await {
+                entry.url = url.trim().to_string();
+                println!("      Found URL: {}", entry.url);
+            }
+        } else {
+            println!("      No URL element found");
+        }
+
+        // Extract Title
+        println!("      Looking for Title...");
+        if let Ok(title_element) = item
+            .query(By::Css("p[property='typo3:title']"))
+            .first()
+            .await
+        {
+            if let Ok(title) = title_element.text().await {
+                entry.title = title.trim().to_string();
+                println!("      Found Title: {}", entry.title);
+            }
+        } else {
+            println!("      No Title element found");
+        }
+
+        // Extract Author
+        println!("      Looking for Author...");
+        if let Ok(author_element) = item
+            .query(By::Css("p[property='typo3:author']"))
+            .first()
+            .await
+        {
+            if let Ok(author) = author_element.text().await {
+                entry.author = author.trim().to_string();
+                println!("      Found Author: {}", entry.author);
+            }
+        } else {
+            println!("      No Author element found");
+        }
+
+        // Extract Type
+        println!("      Looking for Type...");
+        if let Ok(type_element) = item
+            .query(By::Css("p[property='typo3:type']"))
+            .first()
+            .await
+        {
+            if let Ok(file_type) = type_element.text().await {
+                entry.file_type = file_type.trim().to_string();
+                println!("      Found Type: {}", entry.file_type);
+            }
+        } else {
+            println!("      No Type element found");
+        }
+
+        // Extract Size
+        println!("      Looking for Size...");
+        if let Ok(size_element) = item
+            .query(By::Css("p[property='typo3:size']"))
+            .first()
+            .await
+        {
+            if let Ok(size) = size_element.text().await {
+                entry.size = size.trim().to_string();
+                println!("      Found Size: {}", entry.size);
+            }
+        } else {
+            println!("      No Size element found");
+        }
+
+        // URL validation will happen later in batch
+        entry.url_valid = String::new();
+
+        // Only add entry if we have at least a URL or title
+        if !entry.url.is_empty() || !entry.title.is_empty() {
+            entries.push(entry);
+        }
+    }
+
+    Ok(entries)
+}
+
+async fn extract_youtube_content(
+    container: &WebElement,
+    node_id: &str,
+    breadcrumb_path: &str,
+) -> Result<Vec<ContentEntry>> {
+    let mut entries = Vec::new();
+
+    println!("    Looking for YouTube content...");
+    let youtube_container_divs = container
+        .find_all(By::Css("div[data-__neos-fusion-path*='YouTube']"))
+        .await?;
+
+    println!(
+        "    Found {} divs with YouTube in fusion path",
+        youtube_container_divs.len()
+    );
+
+    for (j, item) in youtube_container_divs.iter().enumerate() {
+        println!(
+            "    Processing YouTube container div {} of {}",
+            j + 1,
+            youtube_container_divs.len()
+        );
+        let mut entry = ContentEntry {
+            source_node: node_id.to_string(),
+            breadcrumb_path: breadcrumb_path.to_string(),
+            content_type: "YouTube".to_string(),
+            url: String::new(),
+            title: String::new(),
+            author: String::new(),
+            file_type: "video".to_string(),
+            size: String::new(),
+            url_valid: String::new(),
+        };
+
+        // Extract YouTube URL from iframe src
+        println!("      Looking for YouTube iframe...");
+        if let Ok(iframe_element) = item.query(By::Css("iframe")).first().await {
+            if let Ok(Some(url)) = iframe_element.attr("src").await {
+                entry.url = url.trim().to_string();
+                println!("      Found YouTube URL: {}", entry.url);
+
+                // Extract video ID from YouTube URL for title
+                if let Some(video_id) = extract_youtube_video_id(&entry.url) {
+                    entry.title = format!("YouTube Video ({})", video_id);
+                }
+            }
+        } else {
+            println!("      No YouTube iframe found");
+        }
+
+        // URL validation will happen later in batch
+        entry.url_valid = String::new();
+
+        // Only add entry if we have a URL
+        if !entry.url.is_empty() {
+            entries.push(entry);
+        }
+    }
+
+    Ok(entries)
+}
+
+async fn extract_tutorial_content(
+    driver: &WebDriver,
+    node_id: &str,
+    breadcrumb_path: &str,
+) -> Result<Vec<ContentEntry>> {
+    let mut entries = Vec::new();
+
+    println!("    Looking for Tutorial content...");
+    let tutorial_articles = driver
+        .find_all(By::Css(
+            "article[data-__neos-fusion-path*='Plan2net.Schrack4students:Tutorials']",
+        ))
+        .await?;
+
+    println!("    Found {} tutorial articles", tutorial_articles.len());
+
+    for (i, article) in tutorial_articles.iter().enumerate() {
+        println!(
+            "    Processing Tutorial article {} of {}",
+            i + 1,
+            tutorial_articles.len()
+        );
+        let mut entry = ContentEntry {
+            source_node: node_id.to_string(),
+            breadcrumb_path: breadcrumb_path.to_string(),
+            content_type: "Tutorial".to_string(),
+            url: String::new(),
+            title: String::new(),
+            author: String::new(),
+            file_type: "video".to_string(),
+            size: String::new(),
+            url_valid: String::new(),
+        };
+
+        // Extract YouTube URL from div[property='typo3:videoUrl']
+        println!("      Looking for video URL...");
+        if let Ok(url_div) = article
+            .query(By::Css("div[property='typo3:videoUrl']"))
+            .first()
+            .await
+        {
+            // First try to get text directly from the div
+            if let Ok(url_text) = url_div.text().await {
+                let url = url_text.trim().to_string();
+                if !url.is_empty() {
+                    entry.url = url.clone();
+                    println!("      Found URL: {}", entry.url);
+
+                    // Extract video ID from YouTube URL for title
+                    if let Some(video_id) = extract_youtube_video_id(&entry.url) {
+                        entry.title = format!("YouTube Tutorial ({})", video_id);
+                    }
+                }
+            }
+        } else {
+            println!("      No video URL element found");
+        }
+
+        // URL validation will happen later in batch
+        if !entry.url.is_empty() {
+            entry.url_valid = String::new();
+            entries.push(entry);
+        }
+    }
+
+    Ok(entries)
 }
 
 async fn validate_url(url: &str) -> String {
@@ -585,25 +909,10 @@ async fn extract_content_from_page(
     // Wait for loading indicators to disappear (no hardcoded delays)
     wait_for_page_load(driver, Duration::from_secs(30)).await?;
 
-    println!("  Looking for dynamic content containers directly in the page...");
+    // Find content context (main page or iframe)
+    let in_iframe = find_content_context(driver).await?;
 
-    let iframes = driver.find_all(By::Tag("iframe")).await?;
-    println!("  Found {} iframes on the page", iframes.len());
-
-    if !iframes.is_empty() {
-        println!("  Attempting to enter first iframe...");
-        match driver.enter_frame(0).await {
-            Ok(_) => println!("  Successfully entered iframe"),
-            Err(e) => println!("  Failed to enter iframe: {e}"),
-        }
-    }
-
-    let dynamic_containers = driver
-        .find_all(By::Css(".dynamicContent.dynamic-content-container-1"))
-        .await?;
-
-    println!("  Found {} dynamic containers", dynamic_containers.len());
-
+    // Extract breadcrumb path
     let breadcrumb_path = extract_breadcrumb_path(driver)
         .await
         .unwrap_or_else(|_| "Unknown Path".to_string());
@@ -611,6 +920,14 @@ async fn extract_content_from_page(
 
     let mut entries = Vec::new();
 
+    // Look for dynamic content containers
+    let dynamic_containers = driver
+        .find_all(By::Css(".dynamicContent.dynamic-content-container-1"))
+        .await?;
+
+    println!("  Found {} dynamic containers", dynamic_containers.len());
+
+    // Extract content from dynamic containers
     for (i, container) in dynamic_containers.iter().enumerate() {
         println!(
             "  Processing dynamic container {} of {}",
@@ -621,161 +938,30 @@ async fn extract_content_from_page(
         // Reduced from 500ms to 300ms
         support::sleep(Duration::from_millis(300)).await;
 
-        println!("    Looking for divs containing ExternalLinks paragraphs...");
-
-        let link_container_divs = container
-            .find_all(By::Css("div[data-__neos-fusion-path*='ExternalLinks']"))
-            .await?;
-
-        println!(
-            "    Found {} divs with ExternalLinks in fusion path",
-            link_container_divs.len()
-        );
-
-        for (j, item) in link_container_divs.iter().enumerate() {
-            println!(
-                "    Processing ExternalLinks container div {} of {}",
-                j + 1,
-                link_container_divs.len()
-            );
-            let mut entry = ContentEntry {
-                source_node: node_id.to_string(),
-                breadcrumb_path: breadcrumb_path.clone(),
-                content_type: "ExternalLink".to_string(),
-                url: String::new(),
-                title: String::new(),
-                author: String::new(),
-                file_type: String::new(),
-                size: String::new(),
-                url_valid: String::new(),
-            };
-
-            println!("      Looking for URL...");
-            if let Ok(url_element) = item.query(By::Css("p[property='typo3:url']")).first().await {
-                if let Ok(url) = url_element.text().await {
-                    entry.url = url.trim().to_string();
-                    println!("      Found URL: {}", entry.url);
-                }
-            } else {
-                println!("      No URL element found");
-            }
-
-            println!("      Looking for Title...");
-            if let Ok(title_element) = item
-                .query(By::Css("p[property='typo3:title']"))
-                .first()
-                .await
-            {
-                if let Ok(title) = title_element.text().await {
-                    entry.title = title.trim().to_string();
-                    println!("      Found Title: {}", entry.title);
-                }
-            } else {
-                println!("      No Title element found");
-            }
-
-            println!("      Looking for Author...");
-            if let Ok(author_element) = item
-                .query(By::Css("p[property='typo3:author']"))
-                .first()
-                .await
-            {
-                if let Ok(author) = author_element.text().await {
-                    entry.author = author.trim().to_string();
-                    println!("      Found Author: {}", entry.author);
-                }
-            } else {
-                println!("      No Author element found");
-            }
-
-            println!("      Looking for Type...");
-            if let Ok(type_element) = item
-                .query(By::Css("p[property='typo3:type']"))
-                .first()
-                .await
-            {
-                if let Ok(file_type) = type_element.text().await {
-                    entry.file_type = file_type.trim().to_string();
-                    println!("      Found Type: {}", entry.file_type);
-                }
-            } else {
-                println!("      No Type element found");
-            }
-
-            println!("      Looking for Size...");
-            if let Ok(size_element) = item
-                .query(By::Css("p[property='typo3:size']"))
-                .first()
-                .await
-            {
-                if let Ok(size) = size_element.text().await {
-                    entry.size = size.trim().to_string();
-                    println!("      Found Size: {}", entry.size);
-                }
-            } else {
-                println!("      No Size element found");
-            }
-
-            // URL validation will happen later in batch
+        // Extract ExternalLinks - but mark URLs as Pending for batch validation
+        let mut external_links = extract_external_links(container, node_id, &breadcrumb_path).await?;
+        for entry in &mut external_links {
             entry.url_valid = "Pending".to_string();
-
-            if !entry.url.is_empty() || !entry.title.is_empty() {
-                entries.push(entry);
-            }
         }
+        entries.extend(external_links);
 
-        println!("    Looking for YouTube content...");
-        let youtube_container_divs = container
-            .find_all(By::Css("div[data-__neos-fusion-path*='YouTube']"))
-            .await?;
-
-        println!(
-            "    Found {} divs with YouTube in fusion path",
-            youtube_container_divs.len()
-        );
-
-        for (j, item) in youtube_container_divs.iter().enumerate() {
-            println!(
-                "    Processing YouTube container div {} of {}",
-                j + 1,
-                youtube_container_divs.len()
-            );
-            let mut entry = ContentEntry {
-                source_node: node_id.to_string(),
-                breadcrumb_path: breadcrumb_path.clone(),
-                content_type: "YouTube".to_string(),
-                url: String::new(),
-                title: String::new(),
-                author: String::new(),
-                file_type: "video".to_string(),
-                size: String::new(),
-                url_valid: String::new(),
-            };
-
-            println!("      Looking for YouTube iframe...");
-            if let Ok(iframe_element) = item.query(By::Css("iframe")).first().await {
-                if let Ok(Some(url)) = iframe_element.attr("src").await {
-                    entry.url = url.trim().to_string();
-                    println!("      Found YouTube URL: {}", entry.url);
-
-                    if let Some(video_id) = extract_youtube_video_id(&entry.url) {
-                        entry.title = format!("YouTube Video ({video_id})");
-                    }
-                }
-            } else {
-                println!("      No YouTube iframe found");
-            }
-
-            // URL validation will happen later in batch
+        // Extract YouTube content - but mark URLs as Pending for batch validation
+        let mut youtube_content = extract_youtube_content(container, node_id, &breadcrumb_path).await?;
+        for entry in &mut youtube_content {
             entry.url_valid = "Pending".to_string();
-
-            if !entry.url.is_empty() {
-                entries.push(entry);
-            }
         }
+        entries.extend(youtube_content);
     }
 
-    if !iframes.is_empty() {
+    // Extract Tutorial content (not in dynamic containers) - mark URLs as Pending for batch validation
+    let mut tutorial_content = extract_tutorial_content(driver, node_id, &breadcrumb_path).await?;
+    for entry in &mut tutorial_content {
+        entry.url_valid = "Pending".to_string();
+    }
+    entries.extend(tutorial_content);
+
+    // Exit iframe if we entered one
+    if in_iframe {
         let _ = driver.enter_default_frame().await;
     }
 
