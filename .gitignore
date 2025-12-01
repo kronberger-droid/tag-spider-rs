@@ -8,3 +8,5 @@ config/credentials.json
 
 # Extracted content
 embedded_content/
+.direnv
+.envrc

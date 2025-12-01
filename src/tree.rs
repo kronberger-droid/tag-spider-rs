@@ -1,3 +1,4 @@
+use crate::dom_constants::*;
 use crate::filenode::FileNode;
 use anyhow::{bail, Context, Result};
 use async_recursion::async_recursion;
@@ -29,11 +30,11 @@ impl FileTree {
 
         // Find the top-level tree container and all items
         let container = driver
-            .find(By::Css("[role='tree']"))
+            .find(By::Css(TREE_ROLE))
             .await
             .context("Did not find a file tree in current view!")?;
         let items = container
-            .find_all(By::Css("[role='treeitem']"))
+            .find_all(By::Css(TREEITEM_ROLE))
             .await
             .context("Could not find any treeitems in the current tree!")?;
 
@@ -41,7 +42,7 @@ impl FileTree {
         for item in &items {
             // The aria-labelledby attribute typically stores a unique ID or label
             if let Some(id) = item
-                .attr("aria-labelledby")
+                .attr(ATTR_ARIA_LABELLEDBY)
                 .await
                 .context("Could not get attribute 'aria-labelledby'")?
             {
@@ -144,10 +145,10 @@ async fn find_parent_id(item: &WebElement) -> Result<Option<String>> {
     };
 
     // If the parent is itself a treeitem, we found our parent
-    if let Some(role) = parent.attr("role").await? {
+    if let Some(role) = parent.attr(ATTR_ROLE).await? {
         if role == "treeitem" {
             // Return the parent's aria-labelledby as the parent ID
-            return Ok(parent.attr("aria-labelledby").await?);
+            return Ok(parent.attr(ATTR_ARIA_LABELLEDBY).await?);
         }
     }
 

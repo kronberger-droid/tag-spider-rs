@@ -1,478 +1,20 @@
 // src/main.rs
 use anyhow::{Context, Result};
-use async_recursion::async_recursion;
 use crossterm::event::{Event, KeyCode};
 use csv::{Reader, Writer};
 use futures::stream::{self, StreamExt};
 use std::io::{self, Write};
 use std::path::PathBuf;
 use std::{collections::HashMap, fs, time::Duration};
+use tag_spider_rs::auth::{login, is_relogin_dialog_present, handle_relogin_dialog};
+use tag_spider_rs::content::ContentEntry;
+use tag_spider_rs::dom_constants::*;
 use tag_spider_rs::spider::Spider;
 use tag_spider_rs::tree::FileTree;
-use thirtyfour::{prelude::*, support, By, WebDriver};
-use tokio::time::Instant;
+use thirtyfour::{prelude::*, support, By, WebDriver, WebElement};
 
 static URL: &str = "https://cms.schrackforstudents.com/neos/login";
 static TAGPATH: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/resources/tags.csv");
-
-#[derive(serde::Deserialize)]
-struct Credentials {
-    username: String,
-    password: String,
-}
-
-#[derive(Debug)]
-struct ContentEntry {
-    source_node: String,
-    breadcrumb_path: String,
-    content_type: String,
-    url: String,
-    title: String,
-    author: String,
-    file_type: String,
-    size: String,
-    url_valid: String,
-}
-
-/// Check if relogin dialog is present
-async fn is_relogin_dialog_present(driver: &WebDriver) -> bool {
-    driver
-        .find(By::Id("neos-ReloginDialog"))
-        .await
-        .is_ok()
-}
-
-/// Handle relogin dialog if present
-async fn handle_relogin_dialog(driver: &WebDriver) -> Result<bool> {
-    if !is_relogin_dialog_present(driver).await {
-        return Ok(false);
-    }
-
-    println!("Relogin dialog detected! Attempting to login again...");
-
-    // Get credentials
-    let credentials = get_credentials()?;
-
-    // Find username field in relogin dialog
-    let username_field = driver
-        .find(By::Name("__authentication[Neos][Flow][Security][Authentication][Token][UsernamePassword][username]"))
-        .await
-        .context("Could not find username field in relogin dialog!")?;
-
-    // Find password field in relogin dialog
-    let password_field = driver
-        .find(By::Name("__authentication[Neos][Flow][Security][Authentication][Token][UsernamePassword][password]"))
-        .await
-        .context("Could not find password field in relogin dialog!")?;
-
-    // Find login button in relogin dialog
-    let login_button = driver
-        .find(By::Css("button.style__btn___3rhzP.style__btn--brand___1ZsvX.style__loginButton___1nLYF"))
-        .await
-        .context("Could not find login button in relogin dialog!")?;
-
-    // Clear existing values and enter credentials
-    username_field.clear().await?;
-    username_field.send_keys(&credentials.0).await?;
-
-    password_field.clear().await?;
-    password_field.send_keys(&credentials.1).await?;
-
-    // Click login button
-    login_button.click().await?;
-
-    // Wait for login to complete
-    support::sleep(Duration::from_secs(3)).await;
-
-    // Check if dialog is gone
-    let login_successful = !is_relogin_dialog_present(driver).await;
-
-    if login_successful {
-        println!("Relogin successful!");
-    } else {
-        println!("Relogin may have failed - dialog still present");
-    }
-
-    Ok(login_successful)
-}
-
-/// Get credentials from files
-fn get_credentials() -> Result<(String, String)> {
-    let credential_paths = [
-        PathBuf::from("/run/secrets/cms-pswd"),
-        PathBuf::from("./credentials.json"),
-        PathBuf::from("./config/credentials.json"),
-    ];
-
-    for path in &credential_paths {
-        match fs::read_to_string(path) {
-            Ok(content) => {
-                let creds: Credentials = serde_json::from_str(&content).context(
-                    "Credentials are not valid JSON with fields 'password' and 'username'",
-                )?;
-                return Ok((creds.username, creds.password));
-            }
-            Err(_) => continue,
-        }
-    }
-
-    Err(anyhow::anyhow!("No credentials file found"))
-}
-
-/// Log in using the provided WebDriver.
-pub async fn login(driver: &WebDriver) -> Result<()> {
-    let credentials = get_credentials()?;
-
-    // Find the login elements
-    let username_field = driver
-        .find(By::Id("username"))
-        .await
-        .context("Could not find username field!")?;
-
-    let password_field = driver
-        .find(By::Id("password"))
-        .await
-        .context("Could not find a password field!")?;
-
-    let login_button = driver
-        .find(By::ClassName("neos-login-btn"))
-        .await
-        .context("Could not find login button!")?;
-
-    // Perform the login action
-    driver
-        .action_chain()
-        .click_element(&username_field)
-        .send_keys(&credentials.0)
-        .click_element(&password_field)
-        .send_keys(&credentials.1)
-        .click_element(&login_button)
-        .perform()
-        .await?;
-
-    support::sleep(Duration::from_secs(2)).await;
-
-    Ok(())
-}
-
-/// Retry wrapper that handles relogin dialogs automatically
-async fn retry_with_relogin<F, Fut, T>(
-    driver: &WebDriver,
-    operation: F,
-    max_retries: usize,
-) -> Result<T>
-where
-    F: Fn() -> Fut,
-    Fut: std::future::Future<Output = Result<T>>,
-{
-    let mut last_error = None;
-
-    for attempt in 0..=max_retries {
-        // Check for relogin dialog before attempting operation
-        if is_relogin_dialog_present(driver).await {
-            println!("Relogin dialog detected before operation attempt {}", attempt + 1);
-            match handle_relogin_dialog(driver).await {
-                Ok(true) => {
-                    println!("Relogin successful, continuing with operation...");
-                    // Give some time for the page to settle after relogin
-                    support::sleep(Duration::from_secs(2)).await;
-                },
-                Ok(false) => {
-                    return Err(anyhow::anyhow!("Relogin dialog present but login failed"));
-                },
-                Err(e) => {
-                    return Err(anyhow::anyhow!("Failed to handle relogin dialog: {}", e));
-                }
-            }
-        }
-
-        // Attempt the operation
-        match operation().await {
-            Ok(result) => return Ok(result),
-            Err(e) => {
-                let error_msg = e.to_string();
-
-                // Check if the error is due to relogin dialog intercepting clicks
-                if error_msg.contains("neos-ReloginDialog") ||
-                   error_msg.contains("element click intercepted") ||
-                   error_msg.contains("ElementClickInterceptedError") {
-
-                    println!("Operation failed due to relogin dialog interference (attempt {})", attempt + 1);
-
-                    if attempt < max_retries {
-                        // Try to handle relogin dialog
-                        match handle_relogin_dialog(driver).await {
-                            Ok(true) => {
-                                println!("Relogin successful, retrying operation...");
-                                support::sleep(Duration::from_secs(2)).await;
-                                continue;
-                            },
-                            Ok(false) => {
-                                println!("Relogin failed, but will retry operation anyway");
-                                support::sleep(Duration::from_secs(1)).await;
-                                continue;
-                            },
-                            Err(relogin_err) => {
-                                println!("Failed to handle relogin: {}", relogin_err);
-                                support::sleep(Duration::from_secs(1)).await;
-                                continue;
-                            }
-                        }
-                    }
-                }
-
-                last_error = Some(e);
-
-                if attempt < max_retries {
-                    println!("Operation failed (attempt {}), retrying in 2 seconds...", attempt + 1);
-                    support::sleep(Duration::from_secs(2)).await;
-                }
-            }
-        }
-    }
-
-    Err(last_error.unwrap_or_else(|| anyhow::anyhow!("All retry attempts failed")))
-}
-
-/// Helper function for common operations that need relogin protection
-async fn safe_click_element(driver: &WebDriver, element: &thirtyfour::WebElement) -> Result<()> {
-    retry_with_relogin(driver, || async {
-        element.click().await.map_err(|e| anyhow::anyhow!("Click failed: {}", e))
-    }, 3).await
-}
-
-async fn find_and_click_folder(driver: &WebDriver, folder_id: &str) -> Result<()> {
-    let selector = format!("div[aria-labelledby='{folder_id}']");
-    let folder_element = driver
-        .find(By::Css(&selector))
-        .await
-        .context(format!("Could not find folder with ID: {folder_id}"))?;
-
-    folder_element.scroll_into_view().await?;
-
-    let folder_header = folder_element
-        .find(By::ClassName("node__header__labelWrapper___dJ7OH"))
-        .await
-        .context("Could not find folder header!")?;
-
-    folder_header.click().await?;
-    Ok(())
-}
-
-async fn expand_folder_if_needed(driver: &WebDriver, folder_id: &str) -> Result<()> {
-    retry_with_relogin(driver, || async {
-        let selector = format!("div[aria-labelledby='{folder_id}']");
-        let folder_element = driver.find(By::Css(&selector)).await.context(format!(
-            "Could not find folder element '{folder_id}'. Make sure you're on the correct page and logged in."))?;
-
-        let expanded = folder_element.attr("aria-expanded").await?;
-        if expanded != Some("true".to_string()) {
-            let toggle_button = folder_element
-                .find(By::Css(
-                    "a.node__header__chevron___zXVME.reset__reset___2e25U",
-                ))
-                .await
-                .context("Could not find toggle button!")?;
-
-            toggle_button.click().await?;
-            support::sleep(Duration::from_secs(1)).await;
-        }
-        Ok(())
-    }, 3).await
-}
-
-async fn is_folder_expandable(driver: &WebDriver, folder_id: &str) -> Result<bool> {
-    let selector = format!("div[aria-labelledby='{folder_id}']");
-    let folder_element = driver.find(By::Css(&selector)).await.context(format!(
-        "Could not find folder element '{folder_id}'"))?;
-
-    // Check if the folder has a chevron button (indicates it's expandable)
-    let chevron_exists = folder_element
-        .find(By::Css("a.node__header__chevron___zXVME"))
-        .await
-        .is_ok();
-
-    Ok(chevron_exists)
-}
-
-async fn get_folder_children(driver: &WebDriver, folder_id: &str) -> Result<Vec<String>> {
-    println!("Getting children for folder: {folder_id}");
-
-    // First check if the folder is expandable
-    if !is_folder_expandable(driver, folder_id).await? {
-        println!("Folder {folder_id} is not expandable (no chevron found)");
-        return Ok(Vec::new());
-    }
-
-    expand_folder_if_needed(driver, folder_id).await?;
-    // Reduced from 2000ms to 1000ms
-    support::sleep(Duration::from_millis(1000)).await;
-
-    let parent_selector = format!("div[aria-labelledby='{folder_id}']");
-    let parent_element = driver
-        .find(By::Css(&parent_selector))
-        .await
-        .context("Could not find parent folder element")?;
-
-    println!("Found parent element, now looking for node__contents...");
-
-    let contents_divs = parent_element
-        .find_all(By::Css("div.node__contents___GgwYX"))
-        .await?;
-
-    let mut child_ids = Vec::new();
-
-    for contents_div in contents_divs {
-        println!("Found contents div, looking for child treeitems...");
-
-        let child_treeitems = contents_div
-            .find_all(By::Css("div[role='treeitem']"))
-            .await?;
-
-        println!("Found {} potential child treeitems", child_treeitems.len());
-
-        for child in child_treeitems {
-            if let Some(id) = child.attr("aria-labelledby").await? {
-                child_ids.push(id.clone());
-                println!("Found child: {id}");
-            }
-        }
-    }
-
-    if child_ids.is_empty() {
-        println!("No children found in contents div. Trying fallback method...");
-
-        let all_items = driver.find_all(By::Css("div[role='treeitem']")).await?;
-        let mut found_parent = false;
-        let mut parent_level: Option<i32> = None;
-
-        for item in all_items {
-            if let Some(id) = item.attr("aria-labelledby").await? {
-                if id == folder_id {
-                    found_parent = true;
-                    if let Some(level_str) = item.attr("aria-level").await? {
-                        parent_level = level_str.parse().ok();
-                    }
-                    continue;
-                }
-
-                if found_parent {
-                    if let Some(parent_lvl) = parent_level {
-                        if let Some(current_level_str) = item.attr("aria-level").await? {
-                            if let Ok(current_level) = current_level_str.parse::<i32>() {
-                                if current_level == parent_lvl + 1 {
-                                    child_ids.push(id.clone());
-                                    println!("Found child via fallback: {id}");
-                                } else if current_level <= parent_lvl {
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    println!("Total children found: {}", child_ids.len());
-    Ok(child_ids)
-}
-
-#[async_recursion]
-async fn get_all_descendants(
-    driver: &WebDriver,
-    folder_id: &str,
-    max_depth: usize,
-    current_depth: usize,
-) -> Result<Vec<String>> {
-    let mut all_descendants = Vec::new();
-
-    if current_depth >= max_depth {
-        println!("  Reached maximum depth {max_depth} for folder: {folder_id}");
-        return Ok(all_descendants);
-    }
-
-    println!("  Traversing folder at depth {current_depth}: {folder_id}");
-
-    let children = get_folder_children(driver, folder_id).await?;
-
-    for child_id in children {
-        all_descendants.push(child_id.clone());
-        println!("    Added child: {child_id}");
-
-        // Check if child is expandable before trying to get its children
-        match is_folder_expandable(driver, &child_id).await {
-            Ok(true) => {
-                // Child is expandable, get its children
-                match get_folder_children(driver, &child_id).await {
-                    Ok(grandchildren) => {
-                        if !grandchildren.is_empty() {
-                            println!(
-                                "    Child {} has {} grandchildren, recursing...",
-                                child_id,
-                                grandchildren.len()
-                            );
-                            let descendants =
-                                get_all_descendants(driver, &child_id, max_depth, current_depth + 1)
-                                    .await?;
-                            all_descendants.extend(descendants);
-                        } else {
-                            println!("    Child {child_id} is expandable but has no children");
-                        }
-                    }
-                    Err(e) => {
-                        println!("    Failed to get children for {child_id}: {e}");
-                    }
-                }
-            }
-            Ok(false) => {
-                println!("    Child {child_id} is a leaf node (no chevron indicator)");
-            }
-            Err(e) => {
-                println!("    Could not check if {child_id} is expandable: {e}");
-            }
-        }
-
-        // Reduced from 500ms to 300ms
-        support::sleep(Duration::from_millis(300)).await;
-    }
-
-    println!(
-        "  Found {} total descendants for folder: {}",
-        all_descendants.len(),
-        folder_id
-    );
-    Ok(all_descendants)
-}
-
-async fn extract_breadcrumb_path(driver: &WebDriver) -> Result<String> {
-    let breadcrumbs = driver
-        .find_all(By::Css(
-            ".neos-breadcrumb a, .breadcrumb a, [class*='breadcrumb'] a",
-        ))
-        .await?;
-
-    if !breadcrumbs.is_empty() {
-        let mut path_parts = Vec::new();
-        for breadcrumb in breadcrumbs {
-            if let Ok(text) = breadcrumb.text().await {
-                let trimmed = text.trim();
-                if !trimmed.is_empty() {
-                    path_parts.push(trimmed.to_string());
-                }
-            }
-        }
-        if !path_parts.is_empty() {
-            return Ok(path_parts.join(" > "));
-        }
-    }
-
-    if let Ok(title) = driver.title().await {
-        return Ok(title);
-    }
-
-    Ok("Unknown Path".to_string())
-}
 
 fn extract_youtube_video_id(url: &str) -> Option<String> {
     // Extract video ID from YouTube embed URL like: https://www.youtube.com/embed/H7WzSiZOauA?wmode=transparent&hl=de&rel=0
@@ -497,71 +39,6 @@ fn extract_youtube_video_id(url: &str) -> Option<String> {
     }
 }
 
-async fn navigate_to_node(driver: &WebDriver, node_id: &str) -> Result<()> {
-    println!("  Clicking treeitem to load content...");
-    find_and_click_folder(driver, node_id).await?;
-    println!("  Waiting for page to load after click...");
-    support::sleep(Duration::from_secs(5)).await;
-    Ok(())
-}
-
-async fn find_content_context(driver: &WebDriver) -> Result<bool> {
-    println!("  Looking for content in main context...");
-
-    // Try to find content in main context first
-    let main_containers = driver
-        .find_all(By::Css(".dynamicContent.dynamic-content-container-1"))
-        .await?;
-    let main_articles = driver
-        .find_all(By::Css(
-            "article[data-__neos-fusion-path*='Plan2net.Schrack4students:Tutorials']",
-        ))
-        .await?;
-
-    if !main_containers.is_empty() || !main_articles.is_empty() {
-        println!("  Found content in main context");
-        return Ok(false); // Not in iframe
-    }
-
-    // Try iframes
-    let iframes = driver.find_all(By::Tag("iframe")).await?;
-    println!("  Found {} iframes on the page", iframes.len());
-
-    for i in 0..iframes.len() {
-        println!("  Attempting to enter iframe {}...", i);
-        match driver.enter_frame(i as u16).await {
-            Ok(_) => {
-                println!("  Successfully entered iframe {}", i);
-
-                // Check if content is in this iframe
-                let iframe_containers = driver
-                    .find_all(By::Css(".dynamicContent.dynamic-content-container-1"))
-                    .await?;
-                let iframe_articles = driver
-                    .find_all(By::Css(
-                        "article[data-__neos-fusion-path*='Plan2net.Schrack4students:Tutorials']",
-                    ))
-                    .await?;
-
-                if !iframe_containers.is_empty() || !iframe_articles.is_empty() {
-                    println!("  Found content in iframe {}", i);
-                    return Ok(true); // In iframe
-                }
-
-                // Content not in this iframe, exit and try next
-                driver.enter_default_frame().await?;
-            }
-            Err(e) => {
-                println!("  Failed to enter iframe {}: {}", i, e);
-            }
-        }
-    }
-
-    // No content found anywhere
-    println!("  No content found in any context");
-    Ok(false)
-}
-
 async fn extract_external_links(
     container: &WebElement,
     node_id: &str,
@@ -571,7 +48,7 @@ async fn extract_external_links(
 
     println!("    Looking for divs containing ExternalLinks paragraphs...");
     let link_container_divs = container
-        .find_all(By::Css("div[data-__neos-fusion-path*='ExternalLinks']"))
+        .find_all(By::Css(FUSION_EXTERNAL_LINKS))
         .await?;
 
     println!(
@@ -689,7 +166,7 @@ async fn extract_youtube_content(
 
     println!("    Looking for YouTube content...");
     let youtube_container_divs = container
-        .find_all(By::Css("div[data-__neos-fusion-path*='YouTube']"))
+        .find_all(By::Css(FUSION_YOUTUBE))
         .await?;
 
     println!(
@@ -752,9 +229,7 @@ async fn extract_tutorial_content(
 
     println!("    Looking for Tutorial content...");
     let tutorial_articles = driver
-        .find_all(By::Css(
-            "article[data-__neos-fusion-path*='Plan2net.Schrack4students:Tutorials']",
-        ))
+        .find_all(By::Css(FUSION_TUTORIALS))
         .await?;
 
     println!("    Found {} tutorial articles", tutorial_articles.len());
@@ -869,51 +344,26 @@ async fn validate_urls_concurrent(entries: &mut [ContentEntry], concurrency: usi
     println!("URL validation complete!");
 }
 
-/// Wait for page content to load (matches Spider::wait_content_load)
-async fn wait_for_page_load(driver: &WebDriver, timeout: Duration) -> Result<()> {
-    let start = Instant::now();
-
-    loop {
-        // Check for loading indicators (same as Spider::wait_content_load)
-        let loading_bars = driver
-            .find_all(By::Css(".style__loadingIndicator__container___1yhsy"))
-            .await?;
-
-        if loading_bars.is_empty() {
-            return Ok(());
-        }
-
-        if start.elapsed() > timeout {
-            // Timeout is OK - just proceed
-            return Ok(());
-        }
-
-        support::sleep(Duration::from_millis(500)).await;
-    }
-}
 
 async fn extract_content_from_page(
-    driver: &WebDriver,
+    spider: &Spider,
     node_id: &str,
 ) -> Result<Vec<ContentEntry>> {
     println!("  Extracting content from treeitem: {node_id}");
 
-    println!("  Clicking treeitem to load content...");
-
-    // Use retry wrapper to handle relogin dialogs
-    retry_with_relogin(driver, || async {
-        find_and_click_folder(driver, node_id).await
+    // Use Spider's retry-wrapped click method
+    spider.retry_with_relogin(|| async {
+        spider.click_treeitem(node_id).await
     }, 3).await?;
 
     println!("  Waiting for page to load...");
-    // Wait for loading indicators to disappear (no hardcoded delays)
-    wait_for_page_load(driver, Duration::from_secs(30)).await?;
+    wait_for_loading(&spider.driver, Duration::from_secs(30)).await?;
 
-    // Find content context (main page or iframe)
-    let in_iframe = find_content_context(driver).await?;
+    // Use Spider's content context finder
+    let in_iframe = spider.find_content_context().await?;
 
-    // Extract breadcrumb path
-    let breadcrumb_path = extract_breadcrumb_path(driver)
+    // Use Spider's breadcrumb extractor
+    let breadcrumb_path = spider.extract_breadcrumb_path()
         .await
         .unwrap_or_else(|_| "Unknown Path".to_string());
     println!("  Breadcrumb path: {breadcrumb_path}");
@@ -921,8 +371,8 @@ async fn extract_content_from_page(
     let mut entries = Vec::new();
 
     // Look for dynamic content containers
-    let dynamic_containers = driver
-        .find_all(By::Css(".dynamicContent.dynamic-content-container-1"))
+    let dynamic_containers = spider.driver
+        .find_all(By::Css(DYNAMIC_CONTENT_CONTAINER))
         .await?;
 
     println!("  Found {} dynamic containers", dynamic_containers.len());
@@ -954,7 +404,7 @@ async fn extract_content_from_page(
     }
 
     // Extract Tutorial content (not in dynamic containers) - mark URLs as Pending for batch validation
-    let mut tutorial_content = extract_tutorial_content(driver, node_id, &breadcrumb_path).await?;
+    let mut tutorial_content = extract_tutorial_content(&spider.driver, node_id, &breadcrumb_path).await?;
     for entry in &mut tutorial_content {
         entry.url_valid = "Pending".to_string();
     }
@@ -962,7 +412,7 @@ async fn extract_content_from_page(
 
     // Exit iframe if we entered one
     if in_iframe {
-        let _ = driver.enter_default_frame().await;
+        let _ = spider.driver.enter_default_frame().await;
     }
 
     println!("  Extracted {} entries from {}", entries.len(), node_id);
@@ -983,15 +433,15 @@ fn load_csv_data(path: &str) -> Result<HashMap<String, String>> {
 }
 
 /// Example function to add tags.
-async fn add_tags(clear: bool, driver: &WebDriver) -> Result<()> {
+async fn add_tags(clear: bool, spider: &Spider) -> Result<()> {
     let tags = load_csv_data(TAGPATH).unwrap();
-    let iframe = driver
+    let iframe = spider.driver
         .query(By::Css(r#"iframe[name="neos-content-main"]"#))
         .first()
         .await?;
     iframe.clone().enter_frame().await?;
 
-    let content_collection = driver
+    let content_collection = spider.driver
         .query(By::Css(
             "html body.neos-backend div.container div.neos-contentcollection",
         ))
@@ -1008,14 +458,14 @@ async fn add_tags(clear: bool, driver: &WebDriver) -> Result<()> {
         let value = tags.get(id).unwrap();
 
         question.click().await?;
-        driver.enter_default_frame().await?;
+        spider.driver.enter_default_frame().await?;
 
-        let tag_textbox = driver
+        let tag_textbox = spider.driver
             .query(By::Css("#__neos__editor__property---Tags"))
             .first()
             .await?;
 
-        driver
+        spider.driver
             .action_chain()
             .click_element(&tag_textbox)
             .key_down(thirtyfour::Key::Control)
@@ -1035,7 +485,7 @@ async fn add_tags(clear: bool, driver: &WebDriver) -> Result<()> {
             }
         }
 
-        let apply_button = driver
+        let apply_button = spider.driver
             .query(By::Css("#neos-Inspector-Apply"))
             .first()
             .await?;
@@ -1045,7 +495,7 @@ async fn add_tags(clear: bool, driver: &WebDriver) -> Result<()> {
         iframe.clone().enter_frame().await?;
         support::sleep(Duration::new(1, 0)).await;
     }
-    driver.enter_default_frame().await?;
+    spider.driver.enter_default_frame().await?;
     Ok(())
 }
 
@@ -1069,7 +519,7 @@ fn ask_yes_no(question: &str) -> bool {
     }
 }
 
-async fn bulk_extract_content(driver: &WebDriver) -> Result<()> {
+async fn bulk_extract_content(spider: &Spider) -> Result<()> {
     println!("\n=== Bulk Content Extraction ===");
 
     println!("Enter the treeitem ID to start extraction from:");
@@ -1078,13 +528,13 @@ async fn bulk_extract_content(driver: &WebDriver) -> Result<()> {
     if target_folder_id.is_empty() {
         println!("No folder ID provided. Using default: treeitem-c6643bf0-label");
         let target_folder_id = "treeitem-c6643bf0-label";
-        return do_bulk_extract(driver, target_folder_id).await;
+        return do_bulk_extract(spider, target_folder_id).await;
     }
 
-    do_bulk_extract(driver, &target_folder_id).await
+    do_bulk_extract(spider, &target_folder_id).await
 }
 
-async fn do_bulk_extract(driver: &WebDriver, target_folder_id: &str) -> Result<()> {
+async fn do_bulk_extract(spider: &Spider, target_folder_id: &str) -> Result<()> {
     let validate_urls = ask_yes_no("Do you want to validate URLs? (This will be done concurrently at the end)");
 
     println!("Starting bulk extraction from folder: {target_folder_id}");
@@ -1092,7 +542,7 @@ async fn do_bulk_extract(driver: &WebDriver, target_folder_id: &str) -> Result<(
     println!("Checking if target folder exists on current page...");
 
     // Check if we're on the right page and logged in
-    let page_title = driver
+    let page_title = spider.driver
         .title()
         .await
         .unwrap_or_else(|_| "Unknown".to_string());
@@ -1103,12 +553,12 @@ async fn do_bulk_extract(driver: &WebDriver, target_folder_id: &str) -> Result<(
     support::sleep(Duration::from_secs(2)).await;
 
     // Navigate to the target folder and expand it
-    expand_folder_if_needed(driver, target_folder_id).await?;
+    spider.expand_treeitem_if_needed(target_folder_id).await?;
 
     // Get all descendants (children, grandchildren, etc.) of the target folder
     let max_traversal_depth = 5;
     println!("Starting recursive traversal with max depth: {max_traversal_depth}");
-    let child_ids = get_all_descendants(driver, target_folder_id, max_traversal_depth, 0).await?;
+    let child_ids = spider.get_all_descendants(target_folder_id, max_traversal_depth, 0).await?;
     println!(
         "Found {} total items to process (including all descendants)",
         child_ids.len()
@@ -1151,16 +601,16 @@ async fn do_bulk_extract(driver: &WebDriver, target_folder_id: &str) -> Result<(
         );
 
         // Check for relogin dialog before processing each item
-        if is_relogin_dialog_present(driver).await {
+        if is_relogin_dialog_present(&spider.driver).await {
             println!("Relogin dialog detected before processing item {child_id}");
-            match handle_relogin_dialog(driver).await {
+            match handle_relogin_dialog(&spider.driver).await {
                 Ok(true) => println!("Relogin successful, continuing..."),
                 Ok(false) => println!("Relogin failed, but continuing..."),
                 Err(e) => println!("Error handling relogin: {e}, continuing..."),
             }
         }
 
-        match extract_content_from_page(driver, child_id).await {
+        match extract_content_from_page(spider, child_id).await {
             Ok(entries) => {
                 if !entries.is_empty() {
                     println!("✓ Found {} entries in item {}", entries.len(), child_id);
@@ -1182,7 +632,7 @@ async fn do_bulk_extract(driver: &WebDriver, target_folder_id: &str) -> Result<(
 
     // Also extract from the target folder itself
     println!("\nProcessing target folder: {target_folder_id}");
-    match extract_content_from_page(driver, target_folder_id).await {
+    match extract_content_from_page(spider, target_folder_id).await {
         Ok(entries) => {
             if !entries.is_empty() {
                 println!("Found {} entries in target folder", entries.len());
@@ -1285,10 +735,10 @@ async fn main() -> Result<()> {
         if let Event::Key(event) = crossterm::event::read().unwrap() {
             match event.code {
                 KeyCode::Char('q') => break,
-                KeyCode::Char('a') => add_tags(false, &spider.driver).await?,
-                KeyCode::Char('c') => add_tags(true, &spider.driver).await?,
+                KeyCode::Char('a') => add_tags(false, &spider).await?,
+                KeyCode::Char('c') => add_tags(true, &spider).await?,
                 KeyCode::Char('d') => {
-                    bulk_extract_content(&spider.driver).await?;
+                    bulk_extract_content(&spider).await?;
                 }
                 _ => {}
             }
